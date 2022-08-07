@@ -1,32 +1,37 @@
 package chapter03.hibernate;
 
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
+import org.hibernate.annotations.GeneratorType;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
 public class IP_Unique implements Serializable {
-    @EmbeddedId
-    private CompositePK compositePK;
+
+    @Id
+    private int id;
+
+    @Column
     private String src_ip;
+
+    @Column
     private String dst_ip;
+
     public IP_Unique() {
     }
 
     public IP_Unique(String src_ip, String dst_ip) {
-        this();
         this.src_ip = src_ip;
         this.dst_ip = dst_ip;
     }
 
-    public CompositePK getCompositePK() {
-        return compositePK;
+    public int getId() {
+        return id;
     }
 
-    public void setCompositePK(CompositePK compositePK) {
-        this.compositePK = compositePK;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getSrc_ip() {
@@ -50,57 +55,20 @@ public class IP_Unique implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         IP_Unique ip_unique = (IP_Unique) o;
-        return compositePK.equals(ip_unique.compositePK) && src_ip.equals(ip_unique.src_ip) && dst_ip.equals(ip_unique.dst_ip);
+        return id == ip_unique.id && src_ip.equals(ip_unique.src_ip) && dst_ip.equals(ip_unique.dst_ip);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(compositePK, src_ip, dst_ip);
+        return Objects.hash(id, src_ip, dst_ip);
     }
 
     @Override
     public String toString() {
         return "IP_Unique{" +
-                "compositePK=" + compositePK +
+                "id=" + id +
                 ", src_ip='" + src_ip + '\'' +
                 ", dst_ip='" + dst_ip + '\'' +
                 '}';
-    }
-
-    @Embeddable
-    public static class CompositePK implements Serializable {
-        protected String src_ip;
-        protected String dst_ip;
-
-        public CompositePK() {
-        }
-
-        public CompositePK(String src_ip, String dst_ip) {
-            this.src_ip = src_ip;
-            this.dst_ip = dst_ip;
-        }
-        // equals, hashCode
-
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            CompositePK that = (CompositePK) o;
-            return src_ip.equals(that.src_ip) && dst_ip.equals(that.dst_ip);
-        }
-
-        @Override
-        public String toString() {
-            return "CompositePK{" +
-                    "src_ip='" + src_ip + '\'' +
-                    ", dst_ip='" + dst_ip + '\'' +
-                    '}';
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(src_ip, dst_ip);
-        }
     }
 }
