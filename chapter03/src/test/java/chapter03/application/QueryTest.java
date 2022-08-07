@@ -1,11 +1,8 @@
 package chapter03.application;
 
 import chapter03.hibernate.IP_Unique;
+import chapter03.hibernate.IP_Unique_G;
 import org.testng.annotations.Test;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class QueryTest {
     QueryService service=new ImplementationQueryService();
@@ -15,17 +12,11 @@ public class QueryTest {
     @Test
     public void getResult(){
         String parameter="";
-        var res_list=service.getList(IP_Unique.class);
-        Map<String, List<String>> map = new HashMap<>();
+        var res_list=service.selectAll(IP_Unique.class);
         for (int i = 0; i < res_list.size(); i++) {
-            IP_Unique iu = res_list.get(i);
-            var key=iu.getDst_ip();
-            var value = iu.getSrc_ip();
-            if(map.get(key)!=null) {
-                map.compute(key,(k,v)-> Stream.concat(v.stream(),List.of(value).stream()).collect(Collectors.toList()));
-            } else {
-                map.put(key, new ArrayList<>(Arrays.asList(value)));
-            }
+            var iu=res_list.get(i);
+            var iug=service.saveIP_Unique_G(iu.getDst_ip());
+            var iu_res=service.updateIP_Unique(iug.getDst_ip(),iu.getDst_ip(),iu.getSrc_ip());
         }
 
 

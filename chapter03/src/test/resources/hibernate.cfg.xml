@@ -15,5 +15,6 @@
         <!--Drop and re-create the database schema on startup-->
         <property name="hbm2ddl.auto">none</property>
         <mapping class="chapter03.hibernate.IP_Unique"/>
+        <mapping class="chapter03.hibernate.IP_Unique_G"/>
     </session-factory>
 </hibernate-configuration>

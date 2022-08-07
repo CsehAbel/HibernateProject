@@ -70,4 +70,14 @@ public class IP_Unique implements Serializable {
     public void setDst_ip(String dst_ip) {
         this.dst_ip = dst_ip;
     }
+
+    public IP_Unique_G getGroup() {
+        return group;
+    }
+
+    public void setGroup(IP_Unique_G group) {
+        this.group = group;
+    }
+
+
 }
