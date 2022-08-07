@@ -10,6 +10,8 @@ import java.util.stream.Stream;
 public class QueryTest {
     QueryService service=new ImplementationQueryService();
 
+    //Query using IP_Unique.class and create two new entities from Map<String, List<String>>
+    //create new objects: new IP_Unique_G() and persist them and associate them to the IP_Unique.class
     @Test
     public void getResult(){
         String parameter="";

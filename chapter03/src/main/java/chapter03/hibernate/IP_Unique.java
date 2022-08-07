@@ -16,12 +16,10 @@ public class IP_Unique implements Serializable {
     @Column
     private String dst_ip;
 
-    //it will persist the IP_Unique_G.referencedColumn Name in a new column
     @ManyToOne
-    @JoinColumn(
-            name = "iu_g_dip",
-            referencedColumnName = "dst_ip"
-    )
+    @JoinTable(name="ip_unique_g_jt",
+            joinColumns={@JoinColumn(name = "iu_dip", referencedColumnName = "dst_ip")},
+            inverseJoinColumns={@JoinColumn(name = "iug_dip", referencedColumnName = "dst_ip")})
     private IP_Unique_G group;
 
     public IP_Unique() {
