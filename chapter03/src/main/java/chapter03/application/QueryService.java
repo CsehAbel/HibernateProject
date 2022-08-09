@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface QueryService {
 
-    <T> List<T> getList(Class<T> clazz);
+    <T> List<T> selectAll(Class<T> clazz);
 
     <T> void save(T t);
 

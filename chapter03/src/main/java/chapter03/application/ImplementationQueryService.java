@@ -1,6 +1,5 @@
 package chapter03.application;
 
-import chapter03.hibernate.IP_Unique;
 import chapter03.hibernate.util.SessionUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -10,12 +9,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ImplementationQueryService implements QueryService {
+    public <T> List<T> selectAll(Session session, Class<T> clazz) {
+        List<T> l = new ArrayList<>();
+        Query<T> query = session.createQuery(
+                "from "+clazz.getName()+" c",
+                clazz);
+        return  query.getResultList();
+    }
+
     @Override
-    public <T> List<T> getList(Class<T> clazz) {
+    public <T> List<T> selectAll(Class<T> clazz) {
         List<T> list;
         try (Session session = SessionUtil.getSession()) {
             Transaction tx = session.beginTransaction();
-            list = getList(session,clazz);
+            list = selectAll(session,clazz);
             tx.commit();
         }
         return list;
@@ -34,12 +41,5 @@ public class ImplementationQueryService implements QueryService {
         session.save(t);
     }
 
-    public <T> List<T> getList(Session session, Class<T> clazz) {
-        List<T> l = new ArrayList<>();
-        Query<T> query = session.createQuery(
-                "from "+clazz.getName()+" c",
-                clazz);
-        return  query.getResultList();
-    }
 }
 
