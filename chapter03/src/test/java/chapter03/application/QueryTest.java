@@ -1,17 +1,23 @@
 package chapter03.application;
 
-import chapter03.hibernate.IP_Unique;
-import chapter03.hibernate.Rlst;
-import chapter03.hibernate.Rlst_G;
-import chapter03.hibernate.ST_Ports;
+import chapter03.hibernate.*;
 import org.testng.annotations.Test;
 
-import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class QueryTest {
+    QueryService service = new ImplementationQueryService();
+    public enum STPortsGKeys{
+        ports(1), rule_name(2),rule_number(3);
+
+        int property;
+        STPortsGKeys(int property) {
+            this.property=property;
+        }
+    }
+
     public class RlstKey {
         String dst_ip;
         String app_id;
@@ -54,12 +60,10 @@ public class QueryTest {
         }
     }
 
-    QueryService service = new ImplementationQueryService();
-
     //Query using IP_Unique.class and create two new entities from Map<String, List<String>>
     //create new objects: new IP_Unique_G() and persist them and associate them to the IP_Unique.class
 
-    public Map<String, Set<String>> get_ipunique_map() {
+    private Map<String, Set<String>> get_ipunique_map() {
         String parameter = "";
         var res_list = service.selectAll(IP_Unique.class);
         Map<String, Set<String>> map = new HashMap<>();
@@ -72,9 +76,24 @@ public class QueryTest {
         return map;
     }
 
-    @Test
-    //public Map<String, Map<String, Set<String>>> get_stports() {
-    public void get_stports() {
+    public void createTableIpUniqueG(){
+        var map = get_ipunique_map();
+        Iterator<Map.Entry<String,Set<String>>> it=map.entrySet().iterator();
+        while(it.hasNext()){
+            var entry=it.next();
+            var key=entry.getKey();
+            var val=entry.getValue();
+            IP_Unique_G iug=new IP_Unique_G(key,val);
+            service.save(iug);
+        }
+    }
+
+    //@Test
+    public void selectAllIPUniqueG(){
+        var list=service.selectAll(IP_Unique_G.class);
+        "".isEmpty();
+    }
+    private EnumMap<STPortsGKeys, Map<String, Set<String>>> get_stports_map() {
         var res_list = service.selectAll(ST_Ports.class);
         Map<String, Set<String>> mapPorts = new HashMap<>();
         Map<String, Set<String>> mapRuleName = new HashMap<>();
@@ -86,11 +105,30 @@ public class QueryTest {
             fillMap(mapRuleName, key, stp.getRule_name());
             fillMap(mapRuleNumber, key, stp.getRule_number());
         }
-        Map<String, Map<String, Set<String>>> newm = new HashMap<>();
-        newm.put("ports", mapPorts);
-        newm.put("rule_name", mapRuleName);
-        newm.put("rule_number", mapRuleNumber);
-        //return newm;
+        EnumMap<STPortsGKeys, Map<String, Set<String>>> newm = new EnumMap<>(STPortsGKeys.class);
+        newm.put(STPortsGKeys.ports, mapPorts);
+        newm.put(STPortsGKeys.rule_name, mapRuleName);
+        newm.put(STPortsGKeys.rule_number, mapRuleNumber);
+        return newm;
+    }
+
+
+    public void createTableSTPortsG(){
+        var map=get_stports_map();
+        Iterator<Map.Entry<String,Set<String>>> it=map.get(STPortsGKeys.ports).entrySet().iterator();
+        while(it.hasNext()) {
+            var dest_ip=it.next().getKey();
+            ST_Ports_G stpg = new ST_Ports_G(dest_ip,
+                    map.get(STPortsGKeys.ports).get(dest_ip),
+                    map.get(STPortsGKeys.rule_name).get(dest_ip),
+                    map.get(STPortsGKeys.rule_number).get(dest_ip));
+            service.save(stpg);
+        }
+    }
+    //@Test
+    public void selectAllSTPortsG(){
+        var list=service.selectAll(ST_Ports_G.class);
+        "".isEmpty();
     }
 
     private <T> void fillMap(Map<T, Set<String>> map, T key, String value) {
@@ -107,19 +145,7 @@ public class QueryTest {
         }
     }
 
-    private <T> void fillMapRlst(Map<T, String> map, T key, String value) {
-        if (value == null) {
-            value = "null";
-        }
-        String finalValue = value;
-        if (map.get(key) != null) {
-            throw new InvalidParameterException("trying to replace value");
-        } else {
-            map.put(key, value);
-        }
-    }
-
-    public Map<String, Map<RlstKey, Set<String>>> get_rlst() {
+    private Map<String, Map<RlstKey, Set<String>>> get_rlst_map() {
         var res_list = service.selectAll(Rlst.class);
         Map<RlstKey, Set<String>> mapAppName = new HashMap<>();
         Map<RlstKey, Set<String>> mapComment = new HashMap<>();
@@ -151,8 +177,9 @@ public class QueryTest {
         newm.put("app_requestor", mapAppRequestor);
         return newm;
     }
+
     public void createTableRlst_G(){
-        var newm=get_rlst();
+        var newm= get_rlst_map();
         var map1 = newm.get("ports");
         var map2 = newm.get("app_requestor");
         var map3 = newm.get("tsa");
@@ -169,8 +196,8 @@ public class QueryTest {
             service.save(rlst_g);
         }
         System.out.println("Table and linking tables created");
-
     }
 
+    //
 
 }
