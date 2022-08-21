@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 public class NativeQueryTest {
 
-    static String db_name="CSV_DB";
+    static String db_name="DARWIN_DB";
 
 
     public static String getLatestHistoryTableName() {
