@@ -44,6 +44,19 @@ public class ImplementationQueryService implements QueryService {
         return list;
     }
 
+    @Override
+    public List<String> selectEagleIP() {
+        List<String> list=new ArrayList<>();
+        try (Session session = SessionUtil.getSession()) {
+            Transaction tx = session.beginTransaction();
+            Query<String> query = session.createQuery(
+                    "select a.ip from Eagle a");
+            list = query.getResultList();
+            tx.commit();
+        }
+        return list;
+    }
+
    @Override
     public List<ST_Ports_G> selectSTPortsG(String dest_ip){
         List<ST_Ports_G> list=new ArrayList<>();
@@ -72,17 +85,17 @@ public class ImplementationQueryService implements QueryService {
     }
 
     @Override
-    public List<IP_Unique_G> selectIUG(String dst_ip){
-        List<IP_Unique_G> list=new ArrayList<>();
+    public IP_Unique_G selectIUG(String dst_ip){
+        IP_Unique_G iug=null;
         try(Session session=SessionUtil.getSession()){
             Transaction tx=session.beginTransaction();
             Query<IP_Unique_G> query2=session.createQuery( "from "+
                     IP_Unique_G.class.getName() + " iug " + "where iug.dst_ip=:param");
             query2.setParameter("param",dst_ip);
-            list=query2.getResultList();
+            iug=query2.getSingleResult();
             tx.commit();
         }
-        return list;
+        return iug;
     }
 
         @Override

@@ -17,15 +17,15 @@ public class Rlst_G {
 
     private String app_id;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> ports;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> app_requestor;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> tsa;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> fqdn;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> app_name;
 
     public Rlst_G() {

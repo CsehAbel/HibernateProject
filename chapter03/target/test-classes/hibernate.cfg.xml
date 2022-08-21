@@ -21,5 +21,6 @@
         <mapping class="chapter03.hibernate.Rlst"/>
         <mapping class="chapter03.hibernate.Rlst_G"/>
         <mapping class="chapter03.hibernate.IP_Unique_G"/>
+        <mapping class="chapter03.hibernate.Eagle"/>
     </session-factory>
 </hibernate-configuration>
