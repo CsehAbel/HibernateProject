@@ -86,7 +86,7 @@ public class ReportToExcelTest {
             var history_iug=map.get(iug.getDst_ip());
 
             for (int j = 0; j < rg.size(); j++) {
-                Row row = sheet.createRow(rowNum++);
+
 
                 //take all elements in stpg and combine the Set port and Set rule_name
                 //return two Sets altogether
@@ -110,17 +110,32 @@ public class ReportToExcelTest {
                 List<String> stringList = new ArrayList<>(
                         Arrays.asList(
                                 new String[]{
-                                        getCollect(new_temp),getCollect(old_temp), r_dst_ip, r_app_id, r_concat_app_name,
+                                        ""+history_iug.size(),""+new_temp2.size(),getCollect(new_temp),getCollect(old_temp), r_dst_ip, r_app_id, r_concat_app_name,
                                         concat_map_stpg_list.get("port"),
                                         concat_map_stpg_list.get("rule_name")
                                         }
                                 )
                 );
+                Row row;
+                String[] once=("history_iug.size(),new_temp2.size()," +
+                        "getCollect(new_temp),getCollect(old_temp)," +
+                        "r_dst_ip, r_app_id, r_concat_app_name," +
+                        "concat_map_stpg_list.get(port)," +
+                        "concat_map_stpg_list.get(rule_name)").split(",");
+                if(i==0 && j==0){
+                    row = sheet.createRow(rowNum++);
+                    for (int kek = 0; kek < once.length; kek++) {
+                        String s = once[kek];
+                        Cell cell = row.createCell(kek);
+                        cell.setCellValue(s);
+                    }
+                }
 
-                int colNum = 0;
+                row = sheet.createRow(rowNum++);
                 for (int k = 0; k < stringList.size(); k++) {
-                    Cell cell = row.createCell(colNum++);
-                    cell.setCellValue(stringList.get(k));
+                    String s = stringList.get(k);
+                    Cell cell = row.createCell(k);
+                    cell.setCellValue(s);
                 }
             }
         }
