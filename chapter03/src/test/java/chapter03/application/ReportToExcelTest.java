@@ -137,7 +137,7 @@ public class ReportToExcelTest {
                 }
             }
         }
-        String file_name = "bp_template_test.xlsx";
+        String file_name = String.format("energy_bp_%d.xlsx",rowNum);
         try {
             FileOutputStream outputStream = new FileOutputStream(file_name);
             workbook.write(outputStream);
