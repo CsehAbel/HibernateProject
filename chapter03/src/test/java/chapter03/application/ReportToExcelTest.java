@@ -51,7 +51,7 @@ public class ReportToExcelTest {
                 }
             }
 
-            if (0 < rg.size() && 0 < stpg.size() && e.size()==0) {
+            if (0 < rg.size() && 0 < stpg.size()) {
                 //i except 2 element in rg (dest_ip, app_id) pairs
                 //and 1..3 elements in stpg (dest_ip, rule_name) pairs
                 //for each rg there should be a separate row in the excel
@@ -86,7 +86,7 @@ public class ReportToExcelTest {
             var history_iug=map.get(iug.getDst_ip());
 
             for (int j = 0; j < rg.size(); j++) {
-                Row row = sheet.createRow(rowNum++);
+
 
                 //take all elements in stpg and combine the Set port and Set rule_name
                 //return two Sets altogether
@@ -99,28 +99,41 @@ public class ReportToExcelTest {
 
                 //var iug_sources = getCollect(iug.getSources());
                 var new_temp=new HashSet<>(iug.getSources());
-                var new_temp2=new HashSet<>(iug.getSources());
                 var old_temp= history_iug!=null ? new HashSet<>(history_iug) : new HashSet<String>();
 //              if(history_iug==null){ then new_temp stays iug_getSources, old_temp will be empty
                     //onlyinnew
                 new_temp.removeAll(history_iug);
                     //onlyinold
-                old_temp.removeAll(new_temp2);
+                old_temp.removeAll(iug.getSources());
 
+                Row row;
+                String[] once=("last_week,this_week," +
+                        "added,removed," +
+                        "r_dst_ip, r_app_id, r_concat_app_name," +
+                        "concat_map_stpg_list.get(port)," +
+                        "concat_map_stpg_list.get(rule_name)").split(",");
+                if(i==0 && j==0){
+                    row = sheet.createRow(rowNum++);
+                    for (int kek = 0; kek < once.length; kek++) {
+                        String s = once[kek];
+                        Cell cell = row.createCell(kek);
+                        cell.setCellValue(s);
+                    }
+                }
                 List<String> stringList = new ArrayList<>(
                         Arrays.asList(
                                 new String[]{
-                                        getCollect(new_temp),getCollect(old_temp), r_dst_ip, r_app_id, r_concat_app_name,
+                                        ""+history_iug.size(),""+iug.getSources().size(),getCollect(new_temp),getCollect(old_temp), r_dst_ip, r_app_id, r_concat_app_name,
                                         concat_map_stpg_list.get("port"),
                                         concat_map_stpg_list.get("rule_name")
-                                        }
-                                )
+                                }
+                        )
                 );
-
-                int colNum = 0;
+                row = sheet.createRow(rowNum++);
                 for (int k = 0; k < stringList.size(); k++) {
-                    Cell cell = row.createCell(colNum++);
-                    cell.setCellValue(stringList.get(k));
+                    String s = stringList.get(k);
+                    Cell cell = row.createCell(k);
+                    cell.setCellValue(s);
                 }
             }
         }
@@ -160,7 +173,6 @@ public class ReportToExcelTest {
     }
     @Test
     public void createXlsx(){
-
         writeExcelToFile(selectAllThree(), NativeQueryTest.createMapFromHistory());
     }
 }
