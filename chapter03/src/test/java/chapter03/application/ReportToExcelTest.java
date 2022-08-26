@@ -13,8 +13,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ReportToExcelTest {
@@ -173,6 +171,9 @@ public class ReportToExcelTest {
     }
     @Test
     public void createXlsx(){
+
+        CreateGTablesTest qt=new CreateGTablesTest();
+        qt.createAllThree();
         writeExcelToFile(selectAllThree(), NativeQueryTest.createMapFromHistory());
     }
 }

@@ -7,6 +7,9 @@ import java.util.List;
 public interface QueryService {
 
     <T> List<T> selectAll(Class<T> clazz);
+
+    <T> void deleteAll(Class<T> clazz);
+
     List<Rlst_G> selectRlstG(String dst_ip);
     List<String> selectEagleIP();
 

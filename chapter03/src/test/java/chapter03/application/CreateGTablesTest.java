@@ -1,13 +1,12 @@
 package chapter03.application;
 
 import chapter03.hibernate.*;
-import org.testng.annotations.Test;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class QueryTest {
+public class CreateGTablesTest {
     QueryService service = new ImplementationQueryService();
     public enum STPortsGKeys{
         ports(1), rule_name(2),rule_number(3);
@@ -198,6 +197,13 @@ public class QueryTest {
         System.out.println("Table and linking tables created");
     }
 
-    //
+    public void createAllThree(){
+        service.deleteAll(Rlst_G.class);
+        createTableRlst_G();
+        service.deleteAll(IP_Unique_G.class);
+        createTableIpUniqueG();
+        service.deleteAll(ST_Ports_G.class);
+        createTableSTPortsG();
+    }
 
 }

@@ -29,6 +29,18 @@ public class ImplementationQueryService implements QueryService {
         return list;
     }
 
+    @Override
+    public <T> void deleteAll(Class<T> clazz) {
+        List<T> list;
+        try (Session session = SessionUtil.getSession()) {
+            Transaction tx = session.beginTransaction();
+           session.createQuery(
+                    "delete from "+ clazz.getName(),
+                    clazz).executeUpdate();
+            tx.commit();
+        }
+    }
+
 
     @Override
     public List<Rlst_G> selectRlstG(String dst_ip) {
