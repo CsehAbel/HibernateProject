@@ -30,13 +30,23 @@ public class ImplementationQueryService implements QueryService {
     }
 
     @Override
-    public <T> void deleteAll(Class<T> clazz) {
-        List<T> list;
+    public <T> void remove(T t) {
         try (Session session = SessionUtil.getSession()) {
             Transaction tx = session.beginTransaction();
-           session.createQuery(
-                    "delete from "+ clazz.getName(),
-                    clazz).executeUpdate();
+            session.remove(t);
+            tx.commit();
+        }
+    }
+    @Override
+    public <T> void remove(List<T> list) {
+        try (Session session = SessionUtil.getSession()) {
+            Transaction tx = session.beginTransaction();
+            for (int i = 0; i < list.size(); i++) {
+                //T t= (T) session.merge(list.get(i));
+                T t=list.get(i);
+                session.refresh(t);
+                session.remove(t);
+            }
             tx.commit();
         }
     }

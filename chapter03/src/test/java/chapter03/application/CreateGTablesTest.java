@@ -198,11 +198,11 @@ public class CreateGTablesTest {
     }
 
     public void createAllThree(){
-        service.deleteAll(Rlst_G.class);
+        service.remove(service.selectAll(Rlst_G.class));
         createTableRlst_G();
-        service.deleteAll(IP_Unique_G.class);
+        service.remove(service.selectAll(IP_Unique_G.class));
         createTableIpUniqueG();
-        service.deleteAll(ST_Ports_G.class);
+        service.remove(service.selectAll(ST_Ports_G.class));
         createTableSTPortsG();
     }
 

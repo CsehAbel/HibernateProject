@@ -8,7 +8,9 @@ public interface QueryService {
 
     <T> List<T> selectAll(Class<T> clazz);
 
-    <T> void deleteAll(Class<T> clazz);
+    <T> void remove(T t);
+
+    <T> void remove(List<T> list);
 
     List<Rlst_G> selectRlstG(String dst_ip);
     List<String> selectEagleIP();
