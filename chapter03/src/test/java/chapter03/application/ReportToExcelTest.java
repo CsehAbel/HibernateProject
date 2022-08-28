@@ -22,12 +22,12 @@ public class ReportToExcelTest {
         List<List<Object>> readyToExport = new ArrayList<>();
         var list = service.selectIUGPK();
         var e=service.selectEagleIP();
-        var notineagle=new ArrayList<>(list);
-        notineagle.removeAll(e);
+        //ToDo: make .removeAll faster
+        list.removeAll(e);
 
         //list=select dst_ip from eagle
-        for (int i = 0; i < notineagle.size(); i++) {
-            var param = notineagle.get(i);
+        for (int i = 0; i < list.size(); i++) {
+            var param = list.get(i);
             var iug = service.selectIUG(param);
             var rg = service.selectRlstG(param);
             var stpg = service.selectSTPortsG(param);
