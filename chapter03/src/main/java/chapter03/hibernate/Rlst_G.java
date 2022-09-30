@@ -18,9 +18,9 @@ public class Rlst_G {
     private String app_id;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    private Set<String> ports;
+    private Set<String> comments;
     @ElementCollection(fetch = FetchType.EAGER)
-    private Set<String> app_requestor;
+    private Set<String> ports;
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> tsa;
     @ElementCollection(fetch = FetchType.EAGER)
@@ -77,20 +77,20 @@ public class Rlst_G {
         this.app_id = app_id;
     }
 
+    public Set<String> getComments() {
+        return comments;
+    }
+
+    public void setComments(Set<String> comments) {
+        this.comments = comments;
+    }
+
     public Set<String> getPorts() {
         return ports;
     }
 
     public void setPorts(Set<String> ports) {
         this.ports = ports;
-    }
-
-    public Set<String> getApp_requestor() {
-        return app_requestor;
-    }
-
-    public void setApp_requestor(Set<String> app_requestor) {
-        this.app_requestor = app_requestor;
     }
 
     public Set<String> getTsa() {
@@ -117,13 +117,14 @@ public class Rlst_G {
         this.app_name = app_name;
     }
 
-    public Rlst_G(String dst_ip, String app_id, Set<String> ports, Set<String> app_requestor, Set<String> tsa, Set<String> fqdn, Set<String> app_name) {
+    //ToDO add comment, ports to usage
+    public Rlst_G(String dst_ip, String app_id, Set<String> ports, Set<String> tsa, Set<String> fqdn, Set<String> app_name,Set<String> comments) {
         this.dst_ip = dst_ip;
         this.app_id = app_id;
         this.ports = ports;
-        this.app_requestor = app_requestor;
         this.tsa = tsa;
         this.fqdn = fqdn;
         this.app_name = app_name;
+        this.comments = comments;
     }
 }
