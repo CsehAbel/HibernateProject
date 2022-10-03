@@ -1,20 +1,20 @@
 package chapter03.application;
 
-import chapter03.hibernate.*;
+import chapter03.hibernate.IP;
 
 import java.util.List;
 
 public interface QueryService {
 
-    <T> List<T> selectAll(Class<T> clazz);
-    List<Rlst_G> selectRlstG(String dst_ip);
-    List<String> selectEagleIP();
+    List<String> queryIPTableWhere(String db_name, String table, String dst_ip);
 
-    List<ST_Ports_G> selectSTPortsG(String dest_ip);
+    <T> List<T> querySTPortsWhere(Class<T> clazz, String param);
 
-    List<String> selectIUGPK();
+    <T> List<T> queryRlstWhere(Class<T> clazz, String param);
 
-    IP_Unique_G selectIUG(String dst_ip);
+    <T> List<T> showTables(Class<T> clazz, String db_name);
+
+    <T> List<T> listPKWithoutEagle(String db_name);
 
     <T> void save(T t);
 

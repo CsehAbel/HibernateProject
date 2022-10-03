@@ -1,8 +1,5 @@
 package chapter03.application;
 
-import chapter03.hibernate.IP_Unique_G;
-import chapter03.hibernate.Rlst_G;
-import chapter03.hibernate.ST_Ports_G;
 import chapter03.hibernate.util.SessionUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -13,31 +10,47 @@ import java.util.List;
 
 public class ImplementationQueryService implements QueryService {
 
+    //ToDo add systems table's name as a parameter
+    @Override
+    public List<String> queryIPTableWhere(String db_name, String table, String param){
+        List<String> list=new ArrayList<>();
+        try (Session session = SessionUtil.getSession()) {
+            Query<String> query = session.createNativeQuery(
+                    "select src_ip FROM (select src_ip from "+db_name+"."+table+" WHERE dst_ip=:param) as i" +
+                            " LEFT JOIN (select `0` as sip from "+db_name+".systems) as o \n" +
+                            "ON i.src_ip=o.sip WHERE o.sip IS NOT NULL");
+            query.setParameter("param",param);
+            list = query.getResultList();
+        }
+        return list;
+    }
 
     @Override
-    public <T> List<T> selectAll(Class<T> clazz) {
+    public <T> List<T> querySTPortsWhere(Class<T> clazz, String param) {
         List<T> list;
         try (Session session = SessionUtil.getSession()) {
             Transaction tx = session.beginTransaction();
             List<T> l = new ArrayList<>();
             Query<T> query = session.createQuery(
-                    "from "+ clazz.getName()+" c",
+                    "from "+ clazz.getName()+" c WHERE c.st_dest_ip=:param",
                     clazz);
+            query.setParameter("param",param);
             list = query.getResultList();
             tx.commit();
         }
         return list;
     }
 
-
     @Override
-    public List<Rlst_G> selectRlstG(String dst_ip) {
-        List<Rlst_G> list=new ArrayList<>();
+    public <T> List<T> queryRlstWhere(Class<T> clazz, String param) {
+        List<T> list;
         try (Session session = SessionUtil.getSession()) {
             Transaction tx = session.beginTransaction();
-            Query<Rlst_G> query = session.createQuery(
-                    "from Rlst_G a where a.dst_ip=:param");
-            query.setParameter("param",dst_ip);
+            List<T> l = new ArrayList<>();
+            Query<T> query = session.createQuery(
+                    "from "+ clazz.getName()+" c WHERE c.ips=:param AND change_type!='deleted'",
+                    clazz);
+            query.setParameter("param",param);
             list = query.getResultList();
             tx.commit();
         }
@@ -45,26 +58,27 @@ public class ImplementationQueryService implements QueryService {
     }
 
     @Override
-    public List<String> selectEagleIP() {
-        List<String> list=new ArrayList<>();
+    public <T> List<T> showTables(Class<T> clazz, String db_name){
+
+        List<T> list=new ArrayList<>();
         try (Session session = SessionUtil.getSession()) {
             Transaction tx = session.beginTransaction();
-            Query<String> query = session.createQuery(
-                    "select a.ip from Eagle a");
+            Query<T> query = session.createNativeQuery("SHOW TABLES FROM "+db_name+" LIKE \"ip%\";");
             list = query.getResultList();
             tx.commit();
         }
         return list;
     }
 
-   @Override
-    public List<ST_Ports_G> selectSTPortsG(String dest_ip){
-        List<ST_Ports_G> list=new ArrayList<>();
+    @Override
+    public <T> List<T> listPKWithoutEagle(String db_name) {
+
+        List<T> list = new ArrayList<>();
         try (Session session = SessionUtil.getSession()) {
             Transaction tx = session.beginTransaction();
-            Query<ST_Ports_G> query = session.createQuery(
-                    "from ST_Ports_G a where a.dest_ip=:param");
-            query.setParameter("param",dest_ip);
+            Query<T> query = session.createNativeQuery("SELECT i.dst_ip FROM " +
+                    "(SELECT dst_ip FROM "+db_name+".ip) as i " +
+                    "GROUP BY dst_ip");
             list = query.getResultList();
             tx.commit();
         }
@@ -72,33 +86,6 @@ public class ImplementationQueryService implements QueryService {
     }
 
     @Override
-    public List<String> selectIUGPK(){
-        List<String> list=new ArrayList<>();
-        try(Session session=SessionUtil.getSession()){
-            Transaction tx=session.beginTransaction();
-            Query<String> query2=session.createQuery( "select iug.dst_ip from "+
-                    IP_Unique_G.class.getName() + " iug");
-            list=query2.getResultList();
-            tx.commit();
-        }
-        return list;
-    }
-
-    @Override
-    public IP_Unique_G selectIUG(String dst_ip){
-        IP_Unique_G iug=null;
-        try(Session session=SessionUtil.getSession()){
-            Transaction tx=session.beginTransaction();
-            Query<IP_Unique_G> query2=session.createQuery( "from "+
-                    IP_Unique_G.class.getName() + " iug " + "where iug.dst_ip=:param");
-            query2.setParameter("param",dst_ip);
-            iug=query2.getSingleResult();
-            tx.commit();
-        }
-        return iug;
-    }
-
-        @Override
     public <T> void save( T t) {
         try (Session session = SessionUtil.getSession()) {
             Transaction tx = session.beginTransaction();

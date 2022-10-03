@@ -1,13 +1,11 @@
 package chapter03.hibernate;
 
-import org.hibernate.annotations.GeneratorType;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
-public class IP_Unique implements Serializable {
+public class IP implements Serializable {
 
     @Id
     private int id;
@@ -18,10 +16,10 @@ public class IP_Unique implements Serializable {
     @Column
     private String dst_ip;
 
-    public IP_Unique() {
+    public IP() {
     }
 
-    public IP_Unique(String src_ip, String dst_ip) {
+    public IP(String src_ip, String dst_ip) {
         this.src_ip = src_ip;
         this.dst_ip = dst_ip;
     }
@@ -54,20 +52,19 @@ public class IP_Unique implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        IP_Unique ip_unique = (IP_Unique) o;
-        return id == ip_unique.id && src_ip.equals(ip_unique.src_ip) && dst_ip.equals(ip_unique.dst_ip);
+        IP ip = (IP) o;
+        return src_ip.equals(ip.src_ip) && dst_ip.equals(ip.dst_ip);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, src_ip, dst_ip);
+        return Objects.hash(src_ip, dst_ip);
     }
 
     @Override
     public String toString() {
-        return "IP_Unique{" +
-                "id=" + id +
-                ", src_ip='" + src_ip + '\'' +
+        return "IP{" +
+                "src_ip='" + src_ip + '\'' +
                 ", dst_ip='" + dst_ip + '\'' +
                 '}';
     }
