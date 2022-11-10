@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 public class NativeQueryTest {
 
-    static QueryService qs=new ImplementationQueryService();
+    static QueryService qs=new QueryService();
 
 
     public static String getLatestHistoryTableName(String db_name) {
