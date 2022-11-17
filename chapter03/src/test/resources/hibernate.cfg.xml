@@ -16,7 +16,7 @@
         <property name="hbm2ddl.auto">update</property>
         <property name="hibernate.globally_quoted_identifiers">true</property>
         <mapping class="chapter03.hibernate.IP"/>
-        <mapping class="chapter03.hibernate.ST_Ports"/>
+        <mapping class="chapter03.hibernate.Fwpolicy"/>
         <mapping class="chapter03.hibernate.Rlst"/>
     </session-factory>
 </hibernate-configuration>

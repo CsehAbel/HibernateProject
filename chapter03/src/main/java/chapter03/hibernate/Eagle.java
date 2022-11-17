@@ -10,10 +10,8 @@ import javax.persistence.Table;
 @Data
 public class Eagle {
     @Id
-    int index;
+    int id;
     String ip;
     String base;
     String cidr;
-    String ussm;
-    String vpn;
 }
