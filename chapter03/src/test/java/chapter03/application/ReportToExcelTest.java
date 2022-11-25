@@ -1,8 +1,7 @@
 package chapter03.application;
 
-import chapter03.hibernate.IP_Unique_G;
-import chapter03.hibernate.Rlst_G;
-import chapter03.hibernate.ST_Ports_G;
+import chapter03.hibernate.Fwpolicy;
+import chapter03.hibernate.Rlst;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -12,132 +11,154 @@ import org.testng.annotations.Test;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class ReportToExcelTest {
-    QueryService service = new ImplementationQueryService();
+    QueryService service = new QueryService();
 
-    public List<List<Object>> selectAllThree() {
-        List<List<Object>> readyToExport = new ArrayList<>();
-        var list = service.selectIUGPK();
-        var e=service.selectEagleIP();
-        var notineagle=new ArrayList<>(list);
-        notineagle.removeAll(e);
-
-        //list=select dst_ip from eagle
-        for (int i = 0; i < notineagle.size(); i++) {
-            var param = notineagle.get(i);
-            var iug = service.selectIUG(param);
-            var rg = service.selectRlstG(param);
-            var stpg = service.selectSTPortsG(param);
-
-            if (stpg.size() == 0) {
-                if (rg.size() == 0) {
-
-                } else {
-                    //write rg to not_in_policy
-                    //missing case where dest_ip of rg is not in table ip_unique_g
-                }
-            }
-            if (rg.size() == 0) {
-                if (stpg.size() == 0) {
-
-                } else {
-                    //write stpg to not_in_ruleset
-                    //missing case where dest_ip of stpg is not in table ip_unique_g
-                }
-            }
-
-            if (0 < rg.size() && 0 < stpg.size()) {
-                //i except 2 element in rg (dest_ip, app_id) pairs
-                //and 1..3 elements in stpg (dest_ip, rule_name) pairs
-                //for each rg there should be a separate row in the excel
-                //for each rg combine the ports from the elements of rg
-                List<Object> objectList = new ArrayList<>();
-                objectList.add(iug);
-                objectList.add(rg);
-                objectList.add(stpg);
-                readyToExport.add(objectList);
-            }
-
-        }
-        return readyToExport;
+    public record Union(Rlst rlst, Fwpolicy fwpolicy){
     }
 
-    //for each dest_ip get value from NativeQueryTest.createMapFromHistory()
-    //create two Set's resulting from the difference of two Sets:
-    public void writeExcelToFile(List<List<Object>> readyToExport, Map<String, Set<String>> map){//, Map<String,Set<String>> history_iug_map) {
+    //used for returning the result of supplyInnerJoin()
+    //stores  List<Rlst> notInPolicy, List<Fwpolicy> notInRlst, List<Union> inBoth
+    public record Report(List<Rlst> notInPolicy, List<Fwpolicy> notInRlst, List<Union> inBoth){
+    }
+
+    public Report supplyReport() {
+
+        List<Rlst> rlstList = service.queryRlst();
+        int rlstSize = rlstList.size();
+        List<Fwpolicy> fwpolicyList = service.queryFwpolicy();
+        int fwpolicySize = fwpolicyList.size();
+        List<Rlst> notInPolicy = new ArrayList<>();
+        List<Fwpolicy> notInRuleset = new ArrayList<>();
+        //fill readyToExport with inner join
+        //SELECT * FROM rlstList INNER JOIN fwpolicyList
+        //ON rlstList.start_int=fwpolicyList.dest_ip_start_int AND r.end_int=f.dest_ip_end_int;
+        List<Union> innerJoin1 = new ArrayList<>();
+        for (int i = 0; i < rlstList.size(); i++) {
+            Rlst r = rlstList.get(i);
+            List<Union> unionList1 = new ArrayList<>();
+            //if there is a match, add to matchesForRuleset
+            //if there is no match, add to not_in_policy
+            for (int j = 0; j < fwpolicyList.size(); j++) {
+                Fwpolicy f = fwpolicyList.get(j);
+                if (r.getStart_int() == f.getDest_ip_start_int() && r.getEnd_int() == f.getDest_ip_end_int()) {
+                    Union u = new Union(r,f);
+                    unionList1.add(u);
+                }
+            }
+            if (unionList1.size() == 0) {
+                //place r in notInPolicy
+                notInPolicy.add(r);
+            } else {
+                innerJoin1.addAll(unionList1);
+            }
+        }
+        int notInPolicySize = notInPolicy.size();
+        List<Union> innerJoin2 = new ArrayList<>();
+        for(int l=0; l<fwpolicyList.size(); l++){
+            Fwpolicy f = fwpolicyList.get(l);
+            List<Union> unionList2 = new ArrayList<>();
+            for(int m=0; m<rlstList.size(); m++){
+                Rlst r = rlstList.get(m);
+                if (r.getStart_int() == f.getDest_ip_start_int() && r.getEnd_int() == f.getDest_ip_end_int()) {
+                    Union u = new Union(r,f);
+                    unionList2.add(u);
+                }
+            }
+            if(unionList2.size()==0){
+                //place f in notInRuleset
+                notInRuleset.add(f);
+            } else {
+                innerJoin2.addAll(unionList2);
+            }
+        }
+        int notInRulesetSize = notInRuleset.size();
+        int innerJoin1Size = innerJoin1.size();
+        int innerJoin2Size = innerJoin2.size();
+        boolean twoListsAreEqual = innerJoin1.equals(innerJoin2);
+        return new Report(notInPolicy, notInRuleset, innerJoin1);
+    }
+
+    //write the result of supplyReport() to an excel file
+    //write etiher a List<Rlst> notInPolicy, List<Fwpolicy> notInRlst
+    public <T> void writeExcelToFile(List<T> oneOfEm, String filename){//, Map<String,Set<String>> history_iug_map) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet("first");
 
-        IP_Unique_G iug = null;
-        List<Rlst_G> rg = null;
-        List<ST_Ports_G> stpg = null;
+        var rlst = oneOfEm.get(0);
+        //get each field of the object rlst using reflection
+        List<Method> methods = new ArrayList<>();
+        for (Method method : rlst.getClass().getDeclaredMethods()) {
+            if (
+                    Modifier.isPublic(method.getModifiers())
+                            && method.getParameterTypes().length == 0
+                            && method.getReturnType() != void.class
+                            && method.getName().startsWith("get")) {
+                methods.add(method);
+            }
+        }
+        //create headers for each object
+        //create headers for the fields of a Rlst.java
+        String[] headers = new String[methods.size()];
+        for (int j = 0; j < methods.size(); j++) {
+            Method method = methods.get(j);
+            String name = method.getName();
+            name = name.substring(3);
+            name = name.substring(0, 1).toLowerCase() + name.substring(1);
+            headers[j] = name;
+        }
+
         int rowNum = 0;
-        //List<List<Object>> readyToExport
-        for (int i = 0; i < readyToExport.size(); i++) {
-            var current = readyToExport.get(i);
-            iug = (IP_Unique_G) current.get(0);
-            rg = (List<Rlst_G>) current.get(1);
-            stpg = (List<ST_Ports_G>) current.get(2);
-            var history_iug=map.get(iug.getDst_ip());
+        Row row;
+        //create a row for each header
+        row = sheet.createRow(rowNum++);
+        //create a cell for each field of the object
+        for (int h = 0; h < headers.length; h++) {
+            String header = headers[h];
+            Cell cell = row.createCell(h);
+            cell.setCellValue(header);
+        }
 
-            for (int j = 0; j < rg.size(); j++) {
+        for (int i = 0; i < oneOfEm.size(); i++) {
+            //if oneOfEm is a List<Rlst> notInPolicy
+            //if oneOfEm is a List<Fwpolicy> notInRlst
+            rlst = oneOfEm.get(i);
 
-
-                //take all elements in stpg and combine the Set port and Set rule_name
-                //return two Sets altogether
-                Map<String, String> concat_map_stpg_list = concat_stpg_list_to_map(stpg);
-
-                Rlst_G rlst_g = rg.get(j);
-                var r_dst_ip = rlst_g.getDst_ip();
-                var r_app_id = rlst_g.getApp_id();
-                var r_concat_app_name = getCollect(rlst_g.getApp_name());
-
-                //var iug_sources = getCollect(iug.getSources());
-                var new_temp=new HashSet<>(iug.getSources());
-                var old_temp= history_iug!=null ? new HashSet<>(history_iug) : new HashSet<String>();
-//              if(history_iug==null){ then new_temp stays iug_getSources, old_temp will be empty
-                    //onlyinnew
-                new_temp.removeAll(history_iug);
-                    //onlyinold
-                old_temp.removeAll(iug.getSources());
-
-                Row row;
-                String[] once=("last_week,this_week," +
-                        "added,removed," +
-                        "r_dst_ip, r_app_id, r_concat_app_name," +
-                        "concat_map_stpg_list.get(port)," +
-                        "concat_map_stpg_list.get(rule_name)").split(",");
-                if(i==0 && j==0){
-                    row = sheet.createRow(rowNum++);
-                    for (int kek = 0; kek < once.length; kek++) {
-                        String s = once[kek];
-                        Cell cell = row.createCell(kek);
-                        cell.setCellValue(s);
-                    }
+            row = sheet.createRow(rowNum++);
+            //create a cell for each field of the object
+            for (int j = 0; j < methods.size(); j++) {
+                Method method = methods.get(j);
+                Object value = null;
+                try {
+                    value = method.invoke(rlst);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
                 }
-                List<String> stringList = new ArrayList<>(
-                        Arrays.asList(
-                                new String[]{
-                                        ""+history_iug.size(),""+iug.getSources().size(),getCollect(new_temp),getCollect(old_temp), r_dst_ip, r_app_id, r_concat_app_name,
-                                        concat_map_stpg_list.get("port"),
-                                        concat_map_stpg_list.get("rule_name")
-                                }
-                        )
-                );
-                row = sheet.createRow(rowNum++);
-                for (int k = 0; k < stringList.size(); k++) {
-                    String s = stringList.get(k);
-                    Cell cell = row.createCell(k);
-                    cell.setCellValue(s);
+                Cell cell = row.createCell(j);
+                if (value instanceof String) {
+                    cell.setCellValue((String) value);
+                } else if (value instanceof Integer) {
+                    cell.setCellValue((Integer) value);
+                } else if (value instanceof Long) {
+                    cell.setCellValue((Long) value);
+                } else if (value instanceof Double) {
+                    cell.setCellValue((Double) value);
+                } else if (value instanceof Boolean) {
+                    cell.setCellValue((Boolean) value);
+                } else if (value instanceof Date) {
+                    cell.setCellValue((Date) value);
+                } else if (value instanceof Calendar) {
+                    cell.setCellValue((Calendar) value);
                 }
             }
         }
-        String file_name = String.format("fokus_bp_%d.xlsx",rowNum);
+
+        String file_name = String.format(filename,rowNum);
         try {
             FileOutputStream outputStream = new FileOutputStream(file_name);
             workbook.write(outputStream);
@@ -148,31 +169,163 @@ public class ReportToExcelTest {
             e.printStackTrace();
         }
 
-        System.out.println("Done");
+        System.out.println("Done writing to file: " + file_name);
     }
 
-    private Map<String, String> concat_stpg_list_to_map(List<ST_Ports_G> stpg) {
-        Set<String> stpg_concat_rule_set = new HashSet<>();
-        Set<String> stpg_concat_port_set = new HashSet<>();
-        String stpg_concat_rule = "";
-        String stpg_concat_port = "";
-        for (int k = 0; k < stpg.size(); k++) {
-            stpg_concat_port_set.addAll(stpg.get(k).getPort());
-            stpg_concat_rule_set.addAll(stpg.get(k).getName());
+    //write the result of supplyReport() to an excel file
+    //write List<Union> inBoth
+    public void writeUnionToFile(List<Union> inBoth, String filename){//, Map<String,Set<String>> history_iug_map) {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("first");
+
+        var rlst = inBoth.get(0).rlst;
+        var fwpolicy = inBoth.get(0).fwpolicy;
+        //get each field of the object rlst using reflection
+        List<Method> methodsForRlst = new ArrayList<>();
+        ///get each field of the object rlst using reflection
+        for (Method method : rlst.getClass().getDeclaredMethods()) {
+            if (
+                    Modifier.isPublic(method.getModifiers())
+                            && method.getParameterTypes().length == 0
+                            && method.getReturnType() != void.class
+                            && method.getName().startsWith("get")) {
+                methodsForRlst.add(method);
+            }
         }
-        stpg_concat_port = getCollect(stpg_concat_port_set);
-        stpg_concat_rule = getCollect(stpg_concat_rule_set);
-        Map<String,String> concat_map_stpg_list=new HashMap<>();
-        concat_map_stpg_list.put("port",stpg_concat_port);
-        concat_map_stpg_list.put("rule_name",stpg_concat_rule);
-        return concat_map_stpg_list;
+        //get each field of the object fwpolicy using reflection
+        List<Method> methodsForFwpolicy = new ArrayList<>();
+        for (Method method : fwpolicy.getClass().getDeclaredMethods()) {
+            if (
+                    Modifier.isPublic(method.getModifiers())
+                            && method.getParameterTypes().length == 0
+                            && method.getReturnType() != void.class
+                            && method.getName().startsWith("get")) {
+                methodsForFwpolicy.add(method);
+            }
+        }
+
+        //create headers for each object
+        //create headers for the fields of a Rlst.java
+        String[] headers = new String[methodsForRlst.size()+methodsForFwpolicy.size()];
+        for (int j = 0; j < methodsForRlst.size(); j++) {
+            Method method = methodsForRlst.get(j);
+            String name = method.getName();
+            name = name.substring(3);
+            name = name.substring(0, 1).toLowerCase() + name.substring(1);
+            headers[j] = name;
+        }
+        for (int j = 0; j < methodsForFwpolicy.size(); j++) {
+            Method method = methodsForFwpolicy.get(j);
+            String name = method.getName();
+            name = name.substring(3);
+            name = name.substring(0, 1).toLowerCase() + name.substring(1);
+            headers[j+methodsForRlst.size()] = name;
+        }
+
+        int rowNum = 0;
+        Row row;
+        //create a row for each header
+        row = sheet.createRow(rowNum++);
+        //create a cell for each field of the object
+        for (int h = 0; h < headers.length; h++) {
+            String header = headers[h];
+            Cell cell = row.createCell(h);
+            cell.setCellValue(header);
+        }
+
+        for (int i = 0; i < inBoth.size(); i++) {
+            //if oneOfEm is a List<Union> inBoth
+            rlst = inBoth.get(i).rlst;
+            fwpolicy = inBoth.get(i).fwpolicy;
+
+            row = sheet.createRow(rowNum++);
+            //create a cell for each field of the object
+            for (int j = 0; j < methodsForRlst.size(); j++) {
+                Method method = methodsForRlst.get(j);
+                Object value = null;
+                try {
+                    value = method.invoke(rlst);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+                Cell cell = row.createCell(j);
+                if (value instanceof String) {
+                    cell.setCellValue((String) value);
+                } else if (value instanceof Integer) {
+                    cell.setCellValue((Integer) value);
+                } else if (value instanceof Long) {
+                    cell.setCellValue((Long) value);
+                } else if (value instanceof Double) {
+                    cell.setCellValue((Double) value);
+                } else if (value instanceof Boolean) {
+                    cell.setCellValue((Boolean) value);
+                } else if (value instanceof Date) {
+                    cell.setCellValue((Date) value);
+                } else if (value instanceof Calendar) {
+                    cell.setCellValue((Calendar) value);
+                }
+            }
+
+            for (int j = 0; j < methodsForFwpolicy.size(); j++) {
+                Method method = methodsForFwpolicy.get(j);
+                Object value = null;
+                try {
+                    value = method.invoke(fwpolicy);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+                Cell cell = row.createCell(j+methodsForRlst.size());
+                if (value instanceof String) {
+                    cell.setCellValue((String) value);
+                } else if (value instanceof Integer) {
+                    cell.setCellValue((Integer) value);
+                } else if (value instanceof Long) {
+                    cell.setCellValue((Long) value);
+                } else if (value instanceof Double) {
+                    cell.setCellValue((Double) value);
+                } else if (value instanceof Boolean) {
+                    cell.setCellValue((Boolean) value);
+                } else if (value instanceof Date) {
+                    cell.setCellValue((Date) value);
+                } else if (value instanceof Calendar) {
+                    cell.setCellValue((Calendar) value);
+                }
+            }
+        }
+
+        String file_name = String.format(filename,rowNum);
+        try {
+            FileOutputStream outputStream = new FileOutputStream(file_name);
+            workbook.write(outputStream);
+            workbook.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Done writing to file: " + file_name);
     }
 
-    private String getCollect(Set<String> stpg) {
-        return stpg.stream().collect(Collectors.joining(","));
-    }
     @Test
     public void createXlsx(){
-        writeExcelToFile(selectAllThree(), NativeQueryTest.createMapFromHistory());
+//        List<String> iug = NativeQueryTest.createListFromCurrent(param);
+//        List<String> history_iug = NativeQueryTest.createListFromHistory(param);
+        Report allthree= supplyReport();
+        List<Rlst> notInPolicy = allthree.notInPolicy;
+        writeExcelToFile(notInPolicy,"fokus_notInPolicy_%d.xlsx");
+        List<Fwpolicy> notInRuleset = allthree.notInRlst;
+        writeExcelToFile(notInRuleset,"fokus_notInRuleset_%d.xlsx");
+        List<Union> innerJoin = allthree.inBoth;
+        writeUnionToFile(innerJoin,"fokus_bp_%d.xlsx");
+        //write the result of supplyReport() to an excel file
+        //write etiher a List<Rlst> notInPolicy, List<Fwpolicy> notInRlst, List<Union> inBoth
+
+//        list_of_list_obj = list_of_list_obj.stream()
+//                .filter(x -> x.rlst().stream().filter(y -> y.getIp().equals("139.23.230.92")).findFirst()
+//                        .orElse(null)==null).collect(Collectors.toList());
+//        //supply the inner join of ruleset and fwpolicy
+//        //supply the elastic logs for the specific dst_ip
+//        writeExcelToFile(list_of_list_obj);
     }
 }
