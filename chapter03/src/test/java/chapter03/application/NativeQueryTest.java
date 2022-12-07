@@ -44,14 +44,14 @@ public class NativeQueryTest {
         }
     }
 
-    public static List<String> createListFromHistory(String param){
+    public static List<String> createListFromHistory(long param){
         String db_name="CSV_DB";
         String table= getLatestHistoryTableName(db_name);
         List<String> list=qs.queryIPTableWhere(db_name,table,param);
         return list;
     }
 
-    public static List<String> createListFromCurrent(String param){
+    public static List<String> createListFromCurrent(long param){
         String db_name="CSV_DB";
         String table= "ip";
         List<String> list=qs.queryIPTableWhere(db_name,table,param);
