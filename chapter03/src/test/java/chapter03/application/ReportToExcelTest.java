@@ -313,9 +313,13 @@ public class ReportToExcelTest {
 //        List<String> history_iug = NativeQueryTest.createListFromHistory(param);
         Report allthree= supplyReport();
         List<Rlst> notInPolicy = allthree.notInPolicy;
+        if(notInPolicy.size()>0){
         writeExcelToFile(notInPolicy,"fokus_notInPolicy_%d.xlsx");
+        }
         List<Fwpolicy> notInRuleset = allthree.notInRlst;
+        if (notInRuleset.size()>0){
         writeExcelToFile(notInRuleset,"fokus_notInRuleset_%d.xlsx");
+        }
         List<Union> innerJoin = allthree.inBoth;
         writeUnionToFile(innerJoin,"fokus_bp_%d.xlsx");
         //write the result of supplyReport() to an excel file
