@@ -1,6 +1,7 @@
 package chapter03.application;
 
 import chapter03.hibernate.Fwpolicy;
+import chapter03.hibernate.Host;
 import chapter03.hibernate.IP;
 import chapter03.hibernate.Rlst;
 import chapter03.hibernate.util.SessionUtil;
@@ -60,11 +61,7 @@ public class QueryService {
         return list;
     }
 
-    //Query using IP_Unique.class and create two new entities from Map<String, List<String>>
-    //create new objects: new IP_Unique_G() and persist them and associate them to the IP_Unique.class
-
     public Map<Long, Set<Long>> get_ip_map() {
-        String parameter = "";
         var res_list = selectAll(IP.class);
         Map<Long, Set<Long>> map = new HashMap<>();
         for (int i = 0; i < res_list.size(); i++) {
@@ -75,6 +72,18 @@ public class QueryService {
         }
         return map;
     }
+
+    public Map<String, String> get_host_map() {
+        var res_list = selectAll(Host.class);
+        //Map contains key - ip, value - name of host
+        Map<String, String> map = new HashMap<>();
+        for (int i = 0; i < res_list.size(); i++) {
+            Host iu = res_list.get(i);
+            map.put(iu.getIp(), iu.getName());
+        }
+        return map;
+    }
+
 
     //queryRlstWhere() but instead of generics it uses Rlst.class
     public List<Rlst> queryRlst() {
