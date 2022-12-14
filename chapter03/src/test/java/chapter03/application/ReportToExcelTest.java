@@ -86,7 +86,7 @@ public class ReportToExcelTest {
 
     //write the result of supplyReport() to an excel file
     //write etiher a List<Rlst> notInPolicy, List<Fwpolicy> notInRlst
-    public <T> void writeExcelToFile(List<T> oneOfEm, String filename){//, Map<String,Set<String>> history_iug_map) {
+    public <T> void writeExcelToFile(List<T> oneOfEm, String filename, String path){//, Map<String,Set<String>> history_iug_map) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet("first");
 
@@ -160,7 +160,7 @@ public class ReportToExcelTest {
 
         String file_name = String.format(filename,rowNum);
         try {
-            FileOutputStream outputStream = new FileOutputStream(file_name);
+            FileOutputStream outputStream = new FileOutputStream(path + "\\" + file_name);
             workbook.write(outputStream);
             workbook.close();
         } catch (FileNotFoundException e) {
@@ -174,7 +174,7 @@ public class ReportToExcelTest {
 
     //write the result of supplyReport() to an excel file
     //write List<Union> inBoth
-    public void writeUnionToFile(List<Union> inBoth, String filename){//, Map<String,Set<String>> history_iug_map) {
+    public void writeUnionToFile(List<Union> inBoth, String filename,String path){//, Map<String,Set<String>> history_iug_map) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet("first");
 
@@ -290,12 +290,25 @@ public class ReportToExcelTest {
                 } else if (value instanceof Calendar) {
                     cell.setCellValue((Calendar) value);
                 }
+
             }
         }
 
+        // String file_name = String.format(filename,rowNum);
+        // try {
+        //     FileOutputStream outputStream = new FileOutputStream(file_name);
+        //     workbook.write(outputStream);
+        //     workbook.close();
+        // } catch (FileNotFoundException e) {
+        //     e.printStackTrace();
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
+        //do the above but
+        //write the workbook to a file with file name file_name in the directory C:\Users\z004a6nh\IdeaProjects\HibernateProject\chapter03\reports"
         String file_name = String.format(filename,rowNum);
         try {
-            FileOutputStream outputStream = new FileOutputStream(file_name);
+            FileOutputStream outputStream = new FileOutputStream(path + "\\" + file_name);
             workbook.write(outputStream);
             workbook.close();
         } catch (FileNotFoundException e) {
@@ -314,14 +327,17 @@ public class ReportToExcelTest {
         Report allthree= supplyReport();
         List<Rlst> notInPolicy = allthree.notInPolicy;
         if (notInPolicy.size() > 0){
-            writeExcelToFile(notInPolicy,"darwin_notInPolicy_%d.xlsx");
+            String path = "C:\\Users\\z004a6nh\\IdeaProjects\\HibernateProject\\chapter03\\reports";
+            writeExcelToFile(notInPolicy,"darwin_notInPolicy_%d.xlsx",path);
         }
         List<Fwpolicy> notInRuleset = allthree.notInRlst;
         if (notInRuleset.size() > 0){
-            writeExcelToFile(notInRuleset,"darwin_notInRuleset_%d.xlsx");
+            String path = "C:\\Users\\z004a6nh\\IdeaProjects\\HibernateProject\\chapter03\\reports";
+            writeExcelToFile(notInRuleset,"darwin_notInRuleset_%d.xlsx",path);
         }
         List<Union> innerJoin = allthree.inBoth;
-        writeUnionToFile(innerJoin,"darwin_bp_%d.xlsx");
+        String path = "C:\\Users\\z004a6nh\\IdeaProjects\\HibernateProject\\chapter03\\reports";
+        writeUnionToFile(innerJoin,"darwin_bp_%d.xlsx",path);
         //write the result of supplyReport() to an excel file
         //write etiher a List<Rlst> notInPolicy, List<Fwpolicy> notInRlst, List<Union> inBoth
 
