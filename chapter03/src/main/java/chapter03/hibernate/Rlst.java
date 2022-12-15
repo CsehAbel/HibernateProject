@@ -33,9 +33,9 @@ public class Rlst{
     @Column(name = "end" )
     private String end;
     @Column(name = "start_int" )
-    private double start_int;
+    private long start_int;
     @Column(name = "end_int" )
-    private double end_int;
+    private long end_int;
     @Column(name = "cidr" )
     private int cidr;
     @Column(name = "fqdns" )

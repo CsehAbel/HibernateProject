@@ -1,71 +1,34 @@
 package chapter03.hibernate;
 
 import javax.persistence.*;
-import java.io.Serializable;
-import java.util.Objects;
+
+import lombok.Data;
+
+//create a class to represent the table
+// CREATE TABLE `ip` (
+//   `id` int NOT NULL AUTO_INCREMENT,
+//   `src_ip` varchar(20) NOT NULL,
+//   `dst_ip` varchar(20) NOT NULL,
+//   `src_ip_int` int unsigned NOT NULL,
+//   `dst_ip_int` int unsigned NOT NULL,
+//   PRIMARY KEY (`id`),
+//   UNIQUE KEY `my_uniq_id` (`src_ip`,`dst_ip`)
+// ) ENGINE=InnoDB AUTO_INCREMENT=355228 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
 
 @Entity
-public class IP implements Serializable {
+@Table(name="ip")
+@Data
+public class IP{
 
     @Id
     private int id;
-
-    @Column
+    @Column(name = "src_ip" )
     private String src_ip;
-
-    @Column
+    @Column(name = "dst_ip" )
     private String dst_ip;
-
-    public IP() {
-    }
-
-    public IP(String src_ip, String dst_ip) {
-        this.src_ip = src_ip;
-        this.dst_ip = dst_ip;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getSrc_ip() {
-        return src_ip;
-    }
-
-    public void setSrc_ip(String src_ip) {
-        this.src_ip = src_ip;
-    }
-
-    public String getDst_ip() {
-        return dst_ip;
-    }
-
-    public void setDst_ip(String dst_ip) {
-        this.dst_ip = dst_ip;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        IP ip = (IP) o;
-        return src_ip.equals(ip.src_ip) && dst_ip.equals(ip.dst_ip);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(src_ip, dst_ip);
-    }
-
-    @Override
-    public String toString() {
-        return "IP{" +
-                "src_ip='" + src_ip + '\'' +
-                ", dst_ip='" + dst_ip + '\'' +
-                '}';
-    }
+    @Column(name = "src_ip_int" )
+    private long src_ip_int;
+    @Column(name = "dst_ip_int" )
+    private long dst_ip_int;
 }
