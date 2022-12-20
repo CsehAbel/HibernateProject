@@ -36,9 +36,9 @@ public class Fwpolicy{
     @Column(name = "dest_ip_type" )
     private String dest_ip_type;
     @Column(name = "dest_ip_start_int" )
-    private double dest_ip_start_int;
+    private long dest_ip_start_int;
     @Column(name = "dest_ip_end_int" )
-    private double dest_ip_end_int;
+    private long dest_ip_end_int;
     @Column(name = "json_services" )
     private String json_services;
     @Column(name = "rule_name" )
