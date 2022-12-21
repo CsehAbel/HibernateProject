@@ -108,7 +108,7 @@ public class ReportToExcelTest {
 
     //write the result of supplyReport() to an excel file
     //write etiher a List<Rlst> notInPolicy, List<Fwpolicy> notInRlst
-    public <T> void writeExcelToFile(List<T> oneOfEm, String filename){//, Map<String,Set<String>> history_iug_map) {
+    public <T> void writeExcelToFile(List<T> oneOfEm, String filename, String path){//, Map<String,Set<String>> history_iug_map) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet("first");
 
@@ -182,7 +182,7 @@ public class ReportToExcelTest {
 
         String file_name = String.format(filename,rowNum);
         try {
-            FileOutputStream outputStream = new FileOutputStream(file_name);
+            FileOutputStream outputStream = new FileOutputStream(path + "\\" + file_name);
             workbook.write(outputStream);
             workbook.close();
         } catch (FileNotFoundException e) {
@@ -196,7 +196,7 @@ public class ReportToExcelTest {
 
     //write the result of supplyReport() to an excel file
     //write List<Union> inBoth
-    public void writeUnionToXlsxFile(List<Report2> inBoth, String filename){//, Map<String,Set<String>> history_iug_map) {
+    public void writeUnionToXlsxFile(List<Report2> inBoth, String filename,String path){//, Map<String,Set<String>> history_iug_map) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet("first");
 
@@ -315,6 +315,7 @@ public class ReportToExcelTest {
                 } else if (value instanceof Calendar) {
                     cell.setCellValue((Calendar) value);
                 }
+
             }
             //write exists and notexists
             Cell cell = row.createCell(headers.length);
@@ -336,9 +337,21 @@ public class ReportToExcelTest {
 
         }
 
+        // String file_name = String.format(filename,rowNum);
+        // try {
+        //     FileOutputStream outputStream = new FileOutputStream(file_name);
+        //     workbook.write(outputStream);
+        //     workbook.close();
+        // } catch (FileNotFoundException e) {
+        //     e.printStackTrace();
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
+        //do the above but
+        //write the workbook to a file with file name file_name in the directory C:\Users\z004a6nh\IdeaProjects\HibernateProject\chapter03\reports"
         String file_name = String.format(filename,rowNum);
         try {
-            FileOutputStream outputStream = new FileOutputStream(file_name);
+            FileOutputStream outputStream = new FileOutputStream(path + "\\" + file_name);
             workbook.write(outputStream);
             workbook.close();
         } catch (FileNotFoundException e) {
@@ -350,7 +363,7 @@ public class ReportToExcelTest {
         System.out.println("Done writing to file: " + file_name);
     }
 
-    public void writeUnionToJsonFile(List<Report2> inBoth, String filename) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException{//, Map<String,Set<String>> history_iug_map) {
+    public void writeUnionToJsonFile(List<Report2> inBoth, String filename, String path) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException{//, Map<String,Set<String>> history_iug_map) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet("first");
 
@@ -405,7 +418,7 @@ public class ReportToExcelTest {
                 var value = method.invoke(rlst);
                 //object.add(name, value.toString());
                 //use GSON instead
-                innerJsonObject.addProperty(name, value.toString());
+                innerJsonObject.addProperty(name, value==null ? "null" : value.toString());
 
             }
             for (int j = 0; j < methodsForFwpolicy.size(); j++) {
@@ -449,11 +462,9 @@ public class ReportToExcelTest {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonElement je = JsonParser.parseString(uglyJsonString);
         String prettyJsonString = gson.toJson(je);
-        String file_name = String.format(filename, inBoth.size());
-
-        
+        String file_name = String.format(filename,inBoth.size());
         try {
-            FileWriter writer = new FileWriter(file_name);
+            FileWriter writer = new FileWriter(path + "\\" + file_name);
             writer.write(prettyJsonString);
             writer.close();
         } catch (IOException e) {
@@ -472,7 +483,7 @@ public class ReportToExcelTest {
     public Logger initLogger(String name, String filename) {
         Logger logger = Logger.getLogger("lel");
         try {
-            FileHandler handler = new FileHandler("log.xml");
+            FileHandler handler = new FileHandler(filename);
             handler.setFormatter(new SimpleFormatter(){
                 @Override
                 public synchronized String format(LogRecord lr) {
@@ -488,17 +499,23 @@ public class ReportToExcelTest {
 
     @Test
     public void createXlsx() throws SecurityException, IOException{
-        Logger logger = initLogger("lel", "log.xml");
-        Logger logger2 = initLogger("lel2", "log2.xml");
-        Logger logger3 = initLogger("lel3", "log3.xml");
+        //C:\Users\z004a6nh\IdeaProjects\HibernateProject\chapter03\reports
+        String path="C:\\Users\\z004a6nh\\IdeaProjects\\HibernateProject\\chapter03\\reports";
+        Logger logger = initLogger("lel", path + "\\"+"log.xml");
+        Logger logger2 = initLogger("lel2", path + "\\"+"log2.xml");
+        Logger logger3 = initLogger("lel3", path + "\\"+"log3.xml");
 
 //        List<String> iug = NativeQueryTest.createListFromCurrent(param);
 //        List<String> history_iug = NativeQueryTest.createListFromHistory(param);
         Report allthree= supplyReport();
         List<Rlst> notInPolicy = allthree.notInPolicy;
-        writeExcelToFile(notInPolicy,"energy_notInPolicy_%d.xlsx");
+        if (notInPolicy.size() > 0){
+            writeExcelToFile(notInPolicy,"energy_notInPolicy_%d.xlsx",path);
+        }
         List<Fwpolicy> notInRuleset = allthree.notInRlst;
-        writeExcelToFile(notInRuleset,"energy_notInRuleset_%d.xlsx");
+        if (notInRuleset.size() > 0){
+            writeExcelToFile(notInRuleset,"energy_notInRuleset_%d.xlsx",path);
+        }
         List<Union> innerJoin = allthree.inBoth;
         //create a Map which contains all the records from the ip table 
         //where the innerJoin's destination ip is the same as the ip table's destination ip
@@ -555,7 +572,7 @@ public class ReportToExcelTest {
         }
         //write the report2 list to an excel file
         try {
-            writeUnionToJsonFile(report2, "energy_bp_%d.json");
+            writeUnionToJsonFile(report2, "energy_bp_%d.json",path);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
