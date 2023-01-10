@@ -4,7 +4,6 @@ import lombok.Data;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
 @Entity
 @Data
@@ -13,5 +12,5 @@ public class Eagle {
     int id;
     String ip;
     String base;
-    String cidr;
+    int cidr;
 }
