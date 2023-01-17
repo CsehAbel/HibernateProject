@@ -1,6 +1,5 @@
 package chapter03.application;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -8,12 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import chapter03.hibernate.util.SessionUtil;
-
-import org.hibernate.query.Query;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import chapter03.hibernate.IP;
 import lombok.Data;

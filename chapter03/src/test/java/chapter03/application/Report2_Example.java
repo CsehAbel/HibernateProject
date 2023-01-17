@@ -14,13 +14,14 @@ import chapter03.hibernate.util.SessionUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.testng.annotations.Test;
 
 @lombok.Data
 public class Report2_Example {
 
-    private InnerJoin_Map_Example innerJoin_Map_Example = new InnerJoin_Map_Example();
+    private InnerJoin_Map_Example innerJoin_Map_Example;
 
-    private Map<Union, Map<Long, Set<Long>>> innerJoinMap = new InnerJoin_Map_Example().getInnerJoinMap();
+    private Map<Union, Map<Long, Set<Long>>> innerJoinMap;
 
     private List<Report2> cReport2s;
 
@@ -29,11 +30,22 @@ public class Report2_Example {
     private Map<String, String> host;
 
     public Report2_Example() {
-        innerJoin_Map_Example = new InnerJoin_Map_Example();
+        innerJoin_Map_Example = new InnerJoin_Map_Example_Subclass();
         innerJoinMap = innerJoin_Map_Example.getInnerJoinMap();
         host_Map_Example = new Host_Map_Example();
         host = host_Map_Example.getMap();
         cReport2s = getReport2s();
+    }
+
+    @Test
+    public void testSupplyInnerJoin_Map_Example() {
+        // test InnerJoin_Map_Example_Subclass's getInnerJoinMap()
+        // and its superclass's getInnerJoinMap()
+        var subclass = new InnerJoin_Map_Example_Subclass();
+        var superclass = new InnerJoin_Map_Example();
+        System.out.println("subclass: ");
+        System.out.println("superclass: ");
+        System.out.println("subclass: ");
     }
 
     public String intToIp(long ipv4address) {

@@ -59,25 +59,6 @@ public class QueryService {
         return list;
     }
 
-    public List<Integer> listPKWithoutEagle() {
-
-        List<Integer> list = new ArrayList<>();
-        try (Session session = SessionUtil.getSession()) {
-            Transaction tx = session.beginTransaction();
-            Query<Object> query = session.createNativeQuery("SELECT i.dst_ip_int FROM " +
-                    "(SELECT * FROM csv_db.ip) as i " +
-                    "LEFT JOIN (SELECT ip FROM csv_db.eagle) as e " +
-                    "ON i.dst_ip=e.ip " +
-                    "WHERE e.ip IS NULL " +
-                    "GROUP BY i.dst_ip_int");
-            var stream=query.getResultStream();
-            //cast every objects property in the stream to Integer and collect it to list
-            list = stream.map(x -> (Integer) x).collect(Collectors.toList());
-            tx.commit();
-        }
-        return list;
-    }
-
     public <T> void save( T t) {
         try (Session session = SessionUtil.getSession()) {
             Transaction tx = session.beginTransaction();

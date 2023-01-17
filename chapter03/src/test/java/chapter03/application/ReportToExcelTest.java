@@ -44,7 +44,7 @@ public class ReportToExcelTest {
 
     // write the result of supplyReport() to an excel file
     // write etiher a List<Rlst> notInPolicy, List<Fwpolicy> notInRlst
-    public <T> void writeExcelToFile(List<T> oneOfEm, String filename, String path) {// , Map<String,Set<String>>
+    public <T> void writeSetDifference(List<T> oneOfEm, String filename, String path) {// , Map<String,Set<String>>
                                                                                      // history_iug_map) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet("first");
@@ -419,12 +419,12 @@ public class ReportToExcelTest {
 
         List<Rlst> notInPolicy = allthree.getNotInPolicy();
         if (notInPolicy.size() > 0) {
-            writeExcelToFile(notInPolicy, "energy_notInPolicy_%d.xlsx", path);
+            writeSetDifference(notInPolicy, "energy_notInPolicy_%d.xlsx", path);
         }
 
         List<Fwpolicy> notInRuleset = allthree.getNotInRlst();
         if (notInRuleset.size() > 0) {
-            writeExcelToFile(notInRuleset, "energy_notInRuleset_%d.xlsx", path);
+            writeSetDifference(notInRuleset, "energy_notInRuleset_%d.xlsx", path);
         }
     }
 
