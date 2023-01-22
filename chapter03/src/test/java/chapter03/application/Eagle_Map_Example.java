@@ -2,6 +2,9 @@ package chapter03.application;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.testng.annotations.Test;
+
 import java.util.List;
 
 import chapter03.hibernate.Eagle;
@@ -16,6 +19,13 @@ public class Eagle_Map_Example {
     public Eagle_Map_Example() {
         service = new QueryService();
         map = get_eagle_map();
+    }
+
+    @Test
+    public void testEagle_Map_Example() {
+        var example = new Eagle_Map_Example();
+        var map = example.getMap();
+        System.out.println("map: " + map);
     }
 
     // get_eagle_map containing ip_start_int and ip_end_int

@@ -3,19 +3,31 @@ package chapter03.application;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.testng.annotations.Test;
+
 import java.util.List;
 
+@lombok.Data
 public class InnerJoin_Map_Example_Subclass extends InnerJoin_Map_Example {
 
     private Map<Long, Long> eagle_map;
 
     public InnerJoin_Map_Example_Subclass() {
         super();
-        this.eagle_map = new Eagle_Map_Example().getMap();
+    }
+
+    @Test
+    public void testInnerJoin_Map_Example_Subclass() {
+        var example = new InnerJoin_Map_Example_Subclass();
+        var resource_map = example.getEagle_map();
+        var result_map = example.getInnerJoinMap();
+        System.out.println("map");
     }
 
     @Override
     public Map<Union,Map<Long,Set<Long>>> provideInnerJoinMap(){
+        this.eagle_map = new Eagle_Map_Example().getMap();
         List<Union> newInnerJoin = filteredNewInnerJoin();
         Map<Union,Map<Long,Set<Long>>> innerJoinMap = provideInnerJoinMap(newInnerJoin);
         return innerJoinMap;

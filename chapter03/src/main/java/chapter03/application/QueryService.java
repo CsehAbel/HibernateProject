@@ -1,22 +1,12 @@
 package chapter03.application;
 
-import chapter03.hibernate.Fwpolicy;
-import chapter03.hibernate.Host;
-import chapter03.hibernate.IP;
-import chapter03.hibernate.Rlst;
 import chapter03.hibernate.util.SessionUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class QueryService {
 
@@ -37,7 +27,6 @@ public class QueryService {
         List<T> list;
         try (Session session = SessionUtil.getSession()) {
             Transaction tx = session.beginTransaction();
-            List<T> l = new ArrayList<>();
             Query<T> query = session.createQuery(
                     "from "+ clazz.getName()+" c",
                     clazz);

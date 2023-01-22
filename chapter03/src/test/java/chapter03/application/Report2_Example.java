@@ -1,19 +1,11 @@
 package chapter03.application;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import chapter03.hibernate.Fwpolicy;
-import chapter03.hibernate.Rlst;
-import chapter03.hibernate.util.SessionUtil;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.query.Query;
 import org.testng.annotations.Test;
 
 @lombok.Data
@@ -41,11 +33,11 @@ public class Report2_Example {
     public void testSupplyInnerJoin_Map_Example() {
         // test InnerJoin_Map_Example_Subclass's getInnerJoinMap()
         // and its superclass's getInnerJoinMap()
-        var subclass = new InnerJoin_Map_Example_Subclass();
-        var superclass = new InnerJoin_Map_Example();
-        System.out.println("subclass: ");
-        System.out.println("superclass: ");
-        System.out.println("subclass: ");
+        var report2_example = new Report2_Example();
+        var host = report2_example.getHost();
+        var innerJoinMap = report2_example.getInnerJoinMap();
+        var cReport2s = report2_example.getCReport2s();
+        System.out.println("subclass");
     }
 
     public String intToIp(long ipv4address) {
