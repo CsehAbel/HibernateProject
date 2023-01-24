@@ -9,26 +9,15 @@ import java.util.stream.Collectors;
 @lombok.Data
 public class InnerJoin_Map_Example {
         
-        protected Report_Example report_example;
-        protected Report report;
-        protected List<Union> innerJoin;
-        protected Map<Union,Map<Long,Set<Long>>> innerJoinMap;
-        protected Map<Long, Set<Long>> source_groups;
+        protected List<Union> resource_innerJoin;
+        protected Map<Union,Map<Long,Set<Long>>> result_innerJoinMap;
+        protected Map<Long, Set<Long>> resource_source_groups;
 
-        //assignt report in the getter lazy
-        public Report getReport() {
-            if (this.report == null) {
-                this.report = this.report_example.getReport();
-            }
-            return this.report;
-        }
-
-        //assign report and innerJoin in the constructor
+        //assign report and resource_innerJoin in the constructor
         public InnerJoin_Map_Example() {
-            this.source_groups = new IP_Map_Example().getMap();
-            this.report_example = new Report_Example();
-            this.innerJoin = report_example.getReport().getInBoth();
-            this.innerJoinMap = this.provideInnerJoinMap();
+            this.resource_source_groups = new IP_Map_Example().getMap();
+            this.resource_innerJoin = new Report_Example().getReport().getInBoth();
+            this.result_innerJoinMap = this.provideInnerJoinMap();
         }
 
         public String intToIp(long ipv4address) {
@@ -39,15 +28,15 @@ public class InnerJoin_Map_Example {
         }
 
         public Map<Union,Map<Long,Set<Long>>> provideInnerJoinMap() {
-            return this.provideInnerJoinMap(this.innerJoin);
+            return this.provideInnerJoinMap(this.resource_innerJoin);
         }
 
 
-        public Map<Union,Map<Long,Set<Long>>> provideInnerJoinMap(List<Union> innerJoin){
-            Map<Union,Map<Long,Set<Long>>> innerJoinMap = new HashMap<>();
+        public Map<Union,Map<Long,Set<Long>>> provideInnerJoinMap(List<Union> resource_innerJoin){
+            Map<Union,Map<Long,Set<Long>>> resource_innerJoinMap = new HashMap<>();
             
-            for (int i = 0; i < this.innerJoin.size(); i++) {
-                Union u = this.innerJoin.get(i);
+            for (int i = 0; i < this.resource_innerJoin.size(); i++) {
+                Union u = this.resource_innerJoin.get(i);
                 //List of source ips
                 long start_int = u.getFwpolicy().getDest_ip_start_int();
                 long end_int = u.getFwpolicy().getDest_ip_end_int();
@@ -57,15 +46,15 @@ public class InnerJoin_Map_Example {
                 //create a Map which contains the destination ip and the List of source ips
                 Map<Long, Set<Long>> srcIpList = this.collectToExploded(start_int, end_int);
                 //if the srcIpList is not empty
-                //add the destination ip and the List of source ips to the innerJoinMap
+                //add the destination ip and the List of source ips to the resource_innerJoinMap
                 if (!srcIpList.isEmpty()) {
-                    //place u and srcIpList first in a map and then add the map to the innerJoinMap
+                    //place u and srcIpList first in a map and then add the map to the resource_innerJoinMap
                     Map<Union,Map<Long,Set<Long>>> map = new HashMap<>();
                     map.put(u,srcIpList);
-                    innerJoinMap.putAll(map);
+                    resource_innerJoinMap.putAll(map);
                 }
             }
-            return innerJoinMap;
+            return resource_innerJoinMap;
         }
 
 
@@ -76,7 +65,7 @@ public class InnerJoin_Map_Example {
                 //convert the int to an ip address
                 String string_ip = this.intToIp(j);
                 //check if the ip is already in the map
-                Set<Long> srcIp = this.source_groups.get(j);
+                Set<Long> srcIp = this.resource_source_groups.get(j);
                 //if srcIp is not null, then the ip is in the map
                 //if so srcIpList.put(j,srcIp);  
                 //otherwise don't put it in the map
