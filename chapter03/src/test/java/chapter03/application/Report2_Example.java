@@ -23,7 +23,7 @@ public class Report2_Example {
 
     public Report2_Example() {
         innerJoin_Map_Example = new InnerJoin_Map_Example_Subclass();
-        innerJoinMap = innerJoin_Map_Example.getInnerJoinMap();
+        innerJoinMap = innerJoin_Map_Example.getResult_innerJoinMap();
         host_Map_Example = new Host_Map_Example();
         host = host_Map_Example.getMap();
         cReport2s = getReport2s();
@@ -31,12 +31,6 @@ public class Report2_Example {
 
     @Test
     public void testSupplyInnerJoin_Map_Example() {
-        // test InnerJoin_Map_Example_Subclass's getInnerJoinMap()
-        // and its superclass's getInnerJoinMap()
-        var report2_example = new Report2_Example();
-        var host = report2_example.getHost();
-        var innerJoinMap = report2_example.getInnerJoinMap();
-        var cReport2s = report2_example.getCReport2s();
         System.out.println("subclass");
     }
 

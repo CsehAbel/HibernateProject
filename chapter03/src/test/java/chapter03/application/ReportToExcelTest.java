@@ -365,7 +365,10 @@ public class ReportToExcelTest {
 
             // jsonArray.add(object);
             // use GSON instead
-            jsonObject.add("" + jsonObject.size(), innerJsonObject);
+            //jsonObject.add("" + jsonObject.size(), innerJsonObject);
+            //replace "" + jsonObject.size() with destIpString and AppID
+            String appID = inBoth.get(i).getUnion().getRlst().getApp_id();
+            jsonObject.add(destIpString + appID, innerJsonObject);
 
         }
 
