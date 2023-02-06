@@ -10,19 +10,6 @@ import java.util.List;
 
 public class QueryService {
 
-    public List<String> queryIPTableWhere(String db_name, String table, long param){
-        List<String> list=new ArrayList<>();
-        try (Session session = SessionUtil.getSession()) {
-            Query<String> query = session.createNativeQuery(
-                    "select src_ip FROM (select src_ip from "+db_name+"."+table+" WHERE dst_ip_int=:param) as i" +
-                            " LEFT JOIN (select `0` as sip from "+db_name+".systems) as o \n" +
-                            "ON i.src_ip=o.sip WHERE o.sip IS NOT NULL");
-            query.setParameter("param",param);
-            list = query.getResultList();
-        }
-        return list;
-    }
-
     public <T> List<T> selectAll(Class<T> clazz) {
         List<T> list;
         try (Session session = SessionUtil.getSession()) {

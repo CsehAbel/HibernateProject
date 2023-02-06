@@ -99,39 +99,41 @@ public class BPToExcelTest {
     private com.google.gson.JsonObject create_existsObj(Map.Entry<Union_Alternative, Map<Long, ExistsAsHost>> entry) {
         com.google.gson.JsonObject existsObj = new com.google.gson.JsonObject();
         Map<Long, ExistsAsHost> map = entry.getValue();
+        
+        com.google.gson.JsonArray array_exists_notexists = new com.google.gson.JsonArray();
+        existsObj.add("array_exists_notexists", array_exists_notexists);
+
+        com.google.gson.JsonObject notexistsObj = new com.google.gson.JsonObject();
+        array_exists_notexists.add(notexistsObj);
+        com.google.gson.JsonArray array_notexists = new com.google.gson.JsonArray();
+        notexistsObj.add("notExists", array_notexists);
+
+        com.google.gson.JsonObject existsYesObj = new com.google.gson.JsonObject();
+        array_exists_notexists.add(existsYesObj);
+        com.google.gson.JsonArray array_exists = new com.google.gson.JsonArray();
+        existsYesObj.add("exists", array_exists);
+
         Iterator<Map.Entry<Long, ExistsAsHost>> it2 = map.entrySet().iterator();
         while (it2.hasNext()) {
 
             Map.Entry<Long, ExistsAsHost> entry2 = it2.next();
 
-            com.google.gson.JsonArray array_exists_notexists = new com.google.gson.JsonArray();
-            String ip = intToIp(entry2.getKey());
-            existsObj.add(ip, array_exists_notexists);
-
             ExistsAsHost existsAsHost = entry2.getValue();
+            
 
-            com.google.gson.JsonArray array_notexists = new com.google.gson.JsonArray();
             Iterator<String> it3 = existsAsHost.getNotexists().iterator();
             while (it3.hasNext()) {
                 String notexists = it3.next();
                 array_notexists.add(notexists);
             }
-            String keyForNotExists = existsAsHost.getNotexists().size() + "_existsNot";
-            com.google.gson.JsonObject notexistsObj = new com.google.gson.JsonObject();
-            notexistsObj.add(keyForNotExists, array_notexists);
-            array_exists_notexists.add(notexistsObj);
-
-            com.google.gson.JsonArray array_exists = new com.google.gson.JsonArray();
+            
+            
             Iterator<String> it4 = existsAsHost.getExists().iterator();
             while (it4.hasNext()) {
                 String exists = it4.next();
                 array_exists.add(exists);
             }
-            String keyForExists = existsAsHost.getExists().size() + "_existsYes";
-            com.google.gson.JsonObject existsYesObj = new com.google.gson.JsonObject();
-            existsYesObj.add(keyForExists, array_exists);
-            array_exists_notexists.add(existsYesObj);
-
+            
         }
         return existsObj;
     }

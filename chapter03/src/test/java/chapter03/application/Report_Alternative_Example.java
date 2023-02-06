@@ -32,9 +32,9 @@ public class Report_Alternative_Example {
 
     private Map<Fwpolicy, Set<Rlst>> supplyReport() {
 
-        List<Rlst> rlstAll = service.selectAll(Rlst.class);
+        List<Rlst> rlstAll = this.service.selectAll(Rlst.class);
         int rlstSize = rlstAll.size();
-        List<Fwpolicy> fwpolicyAll = service.selectAll(Fwpolicy.class);
+        List<Fwpolicy> fwpolicyAll = this.service.selectAll(Fwpolicy.class);
         int fwpolicySize = fwpolicyAll.size();
         Map<Fwpolicy,Set<Rlst>> innerJoin = new HashMap<>();
  

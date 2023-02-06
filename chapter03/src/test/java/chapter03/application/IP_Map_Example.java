@@ -14,18 +14,18 @@ import lombok.Data;
 @Data
 public class IP_Map_Example {
 
-    private Map<Long, Set<Long>> map ;
+    private Map<Long, Set<Long>> map;
 
     private QueryService service;
 
     //assign map in the constructor
     public IP_Map_Example() {
-        service = new QueryService();
-        map = get_ip_map();
+        this.service = new QueryService();
+        this.map = get_ip_map();
     }
     
     
-    private Map<Long, Set<Long>> get_ip_map() {    
+    private Map<Long, Set<Long>> get_ip_map() {  
         List<IP> res_list = this.service.selectAll(IP.class);
         Map<Long, Set<Long>> map = new HashMap<>();
         for (int i = 0; i < res_list.size(); i++) {
