@@ -31,123 +31,42 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 
-
 public class BPToExcelTest {
 
     // Union_Exists_Map_Example_Subclass union_Exists_Map_Example_Subclass;
     protected Union_Exists_Map_Example union_Exists_Map_Example;
     protected String path = "C:\\Users\\z004a6nh\\IdeaProjects\\HibernateProject\\chapter03\\reports";
 
+    public void writeUnionToJsonFile(
+            Map<Union_Alternative, Map<Long, ExistsAsHost>> result_unionExistsMap, String filename, String path)
+            throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
-    public void writeUnionToJsonFile(Map<Union, Map<Long, ExistsAsHost>> result_unionExistsMap, String filename, String path)
-            throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {// ,
-                                                                                                // Map<String,Set<String>>
-                                                                                                // history_iug_map) {
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFSheet sheet = workbook.createSheet("first");
-
-        // get each field of the object rlst using reflection
-        List<Method> methodsForRlst = new ArrayList<>();
-        /// get each field of the object rlst using reflection
-        for (Method method : Rlst.class.getDeclaredMethods()) {
-            if (Modifier.isPublic(method.getModifiers())
-                    && method.getParameterTypes().length == 0
-                    && method.getReturnType() != void.class
-                    && method.getName().startsWith("get")) {
-                methodsForRlst.add(method);
-            }
-        }
-        // get each field of the object fwpolicy using reflection
-        List<Method> methodsForFwpolicy = new ArrayList<>();
-        for (Method method : Fwpolicy.class.getDeclaredMethods()) {
-            if (Modifier.isPublic(method.getModifiers())
-                    && method.getParameterTypes().length == 0
-                    && method.getReturnType() != void.class
-                    && method.getName().startsWith("get")) {
-                methodsForFwpolicy.add(method);
-            }
-        }
-
-        //create an iterator of map entries
-        Iterator<Map.Entry<Union, Map<Long, ExistsAsHost>>> it = result_unionExistsMap.entrySet().iterator();
+        // create an iterator of map entries
+        Iterator<Map.Entry<Union_Alternative, Map<Long, ExistsAsHost>>> it = result_unionExistsMap.entrySet()
+                .iterator();
 
         com.google.gson.JsonObject jsonObject = new com.google.gson.JsonObject();
         com.google.gson.JsonArray array = new com.google.gson.JsonArray();
         jsonObject.add("inBoth", array);
 
-        while(it.hasNext()) {
-            Map.Entry<Union, Map<Long, ExistsAsHost>> entry = it.next();
+        while (it.hasNext()) {
+            Map.Entry<Union_Alternative, Map<Long, ExistsAsHost>> entry = it.next();
             com.google.gson.JsonObject innerJsonObject = new com.google.gson.JsonObject();
             array.add(innerJsonObject);
 
-            String key = entry.getKey().getRlst().getStart() + "-" + entry.getKey().getRlst().getEnd() + "_"
-                    + entry.getKey().getRlst().getApp_id();
+            String keys_ip = entry.getKey().getFwpolicy().getDest_ip_start() + "_"
+                    + entry.getKey().getFwpolicy().getDest_ip_end();
+            String keys_appid = entry.getKey().getRlstSet().stream().map(Rlst::getApp_id).reduce("", (a, b) -> a + "_" + b);
+            String key = keys_ip + "_" + keys_appid;
             com.google.gson.JsonArray arrayOfTwo = new com.google.gson.JsonArray();
+
             innerJsonObject.add(key, arrayOfTwo);
-            
-            com.google.gson.JsonObject innerInnerJsonObject = new com.google.gson.JsonObject();
-            com.google.gson.JsonObject sourcesExistsJsonObject = new com.google.gson.JsonObject();
-            arrayOfTwo.add(innerInnerJsonObject);
-            arrayOfTwo.add(sourcesExistsJsonObject);
 
-            
+            com.google.gson.JsonObject union_aObj = create_union_aObj(entry);
+            arrayOfTwo.add(union_aObj);
 
-            
-
-            Rlst rlst = entry.getKey().getRlst();
-            Fwpolicy fwpolicy = entry.getKey().getFwpolicy();
-
-            for (int j = 0; j < methodsForRlst.size(); j++) {
-                Method method = methodsForRlst.get(j);
-                String name = method.getName();
-                name = name.substring(3);
-                name = name.substring(0, 1).toLowerCase() + name.substring(1);
-                var value = method.invoke(rlst);
-                
-                innerInnerJsonObject.addProperty(name, value == null ? "null" : value.toString());
-
-            }
-            for (int j = 0; j < methodsForFwpolicy.size(); j++) {
-                Method method = methodsForFwpolicy.get(j);
-                String name = method.getName();
-                name = name.substring(3);
-                name = name.substring(0, 1).toLowerCase() + name.substring(1);
-                var value = method.invoke(fwpolicy);
-
-                innerInnerJsonObject.addProperty(name, value.toString());
-            }
-
-            Map<Long, ExistsAsHost> map = entry.getValue();
-            Iterator<Map.Entry<Long, ExistsAsHost>> it2 = map.entrySet().iterator();
-            while(it2.hasNext()) {
-                
-                Map.Entry<Long, ExistsAsHost> entry2 = it2.next();
-
-                com.google.gson.JsonArray array_exists_notexists = new com.google.gson.JsonArray();
-                String ip = intToIp(entry2.getKey());
-                sourcesExistsJsonObject.add(ip, array_exists_notexists);
-                
-                com.google.gson.JsonArray array_notexists = new com.google.gson.JsonArray();
-                com.google.gson.JsonArray array_exists = new com.google.gson.JsonArray();
-                array_exists_notexists.add(array_notexists);
-                array_exists_notexists.add(array_exists);
-                
-                Iterator<String> it3 = entry2.getValue().getNotexists().iterator();
-                
-                while(it3.hasNext()) {
-                    String notexists = it3.next();
-                    array_notexists.add(notexists);
-                }
-
-                Iterator<String> it4 = entry2.getValue().getExists().iterator();
-                
-                while(it4.hasNext()) {
-                    String exists = it4.next();
-                    array_exists.add(exists);
-                }
-
-            }
-            
+            com.google.gson.JsonObject existsObj = create_existsObj(entry);
+            arrayOfTwo.add(existsObj);
         }
 
         String uglyJsonString = jsonObject.toString();
@@ -163,6 +82,127 @@ public class BPToExcelTest {
             e.printStackTrace();
         }
         System.out.println("Done writing to file: " + file_name);
+    }
+
+    private com.google.gson.JsonObject create_union_aObj(Map.Entry<Union_Alternative, Map<Long, ExistsAsHost>> entry) {
+        com.google.gson.JsonObject union_aObj = new com.google.gson.JsonObject();
+        Set<Rlst> rlst = entry.getKey().getRlstSet();
+        com.google.gson.JsonArray arrayForRlst = create_rlsts_array(rlst);
+        union_aObj.add("rlsts", arrayForRlst);
+
+        Fwpolicy fwpolicy = entry.getKey().getFwpolicy();
+        com.google.gson.JsonObject fwpolicyJsonObject = create_fwpolicy_object(fwpolicy);
+        union_aObj.add("fwpolicy", fwpolicyJsonObject);
+        return union_aObj;
+    }
+
+    private com.google.gson.JsonObject create_existsObj(Map.Entry<Union_Alternative, Map<Long, ExistsAsHost>> entry) {
+        com.google.gson.JsonObject existsObj = new com.google.gson.JsonObject();
+        Map<Long, ExistsAsHost> map = entry.getValue();
+        Iterator<Map.Entry<Long, ExistsAsHost>> it2 = map.entrySet().iterator();
+        while (it2.hasNext()) {
+
+            Map.Entry<Long, ExistsAsHost> entry2 = it2.next();
+
+            com.google.gson.JsonArray array_exists_notexists = new com.google.gson.JsonArray();
+            String ip = intToIp(entry2.getKey());
+            existsObj.add(ip, array_exists_notexists);
+
+            ExistsAsHost existsAsHost = entry2.getValue();
+
+            com.google.gson.JsonArray array_notexists = new com.google.gson.JsonArray();
+            Iterator<String> it3 = existsAsHost.getNotexists().iterator();
+            while (it3.hasNext()) {
+                String notexists = it3.next();
+                array_notexists.add(notexists);
+            }
+            String keyForNotExists = existsAsHost.getNotexists().size() + "_existsNot";
+            com.google.gson.JsonObject notexistsObj = new com.google.gson.JsonObject();
+            notexistsObj.add(keyForNotExists, array_notexists);
+            array_exists_notexists.add(notexistsObj);
+
+            com.google.gson.JsonArray array_exists = new com.google.gson.JsonArray();
+            Iterator<String> it4 = existsAsHost.getExists().iterator();
+            while (it4.hasNext()) {
+                String exists = it4.next();
+                array_exists.add(exists);
+            }
+            String keyForExists = existsAsHost.getExists().size() + "_existsYes";
+            com.google.gson.JsonObject existsYesObj = new com.google.gson.JsonObject();
+            existsYesObj.add(keyForExists, array_exists);
+            array_exists_notexists.add(existsYesObj);
+
+        }
+        return existsObj;
+    }
+
+    private com.google.gson.JsonObject create_fwpolicy_object(Fwpolicy fwpolicy) {
+
+        // get each field of the object fwpolicy using reflection
+        List<Method> methodsForFwpolicy = new ArrayList<>();
+        for (Method method : Fwpolicy.class.getDeclaredMethods()) {
+            if (Modifier.isPublic(method.getModifiers())
+                    && method.getParameterTypes().length == 0
+                    && method.getReturnType() != void.class
+                    && method.getName().startsWith("get")) {
+                methodsForFwpolicy.add(method);
+            }
+        }
+
+        com.google.gson.JsonObject fwpolicyJsonObject = new com.google.gson.JsonObject();
+        for (Method method : methodsForFwpolicy) {
+            String name = method.getName();
+            name = name.substring(3);
+            name = name.substring(0, 1).toLowerCase() + name.substring(1);
+            Object value=null;
+            try {
+                value = method.invoke(fwpolicy);
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            fwpolicyJsonObject.addProperty(name, value.toString());
+        }
+        return fwpolicyJsonObject;
+    }
+
+    private com.google.gson.JsonArray create_rlsts_array(Set<Rlst> rlstSet) {
+
+        // get each field of the object rlst using reflection
+        List<Method> methodsForRlst = new ArrayList<>();
+        /// get each field of the object rlst using reflection
+        for (Method method : Rlst.class.getDeclaredMethods()) {
+            if (Modifier.isPublic(method.getModifiers())
+                    && method.getParameterTypes().length == 0
+                    && method.getReturnType() != void.class
+                    && method.getName().startsWith("get")) {
+                methodsForRlst.add(method);
+            }
+        }
+        com.google.gson.JsonArray arrayForRlst = new com.google.gson.JsonArray();
+        for (Rlst aRlst : rlstSet) {
+
+            // new com.google.gson.JsonObject() for each rlst
+            com.google.gson.JsonObject rlstJsonObject = new com.google.gson.JsonObject();
+            arrayForRlst.add(rlstJsonObject);
+            for (Method method : methodsForRlst) {
+                String name = method.getName();
+                name = name.substring(3);
+                name = name.substring(0, 1).toLowerCase() + name.substring(1);
+                try {
+                    var value = method.invoke(aRlst);
+                    if (value == null){
+                        throw new NullPointerException();
+                    }
+                    rlstJsonObject.addProperty(name, value == null ? "null" : value.toString());
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+        return arrayForRlst;
     }
 
     public String intToIp(long ipv4address) {

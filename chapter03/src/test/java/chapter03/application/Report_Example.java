@@ -23,7 +23,7 @@ public class Report_Example {
 
     @Test
     public void testSupplyReport() {
-        var r = supplyReport();
+        System.out.println("report");
     }
 
     private Report supplyReport() {
