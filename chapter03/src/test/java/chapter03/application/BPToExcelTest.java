@@ -221,7 +221,7 @@ public class BPToExcelTest {
         union_Exists_Map_Example = new Union_Exists_Map_Example_Subclass();
         // write the report2 list to an excel file
         try {
-            writeUnionToJsonFile(union_Exists_Map_Example.result_unionExistsMap, "energyx_bp_%d.json", path);
+            writeUnionToJsonFile(union_Exists_Map_Example.result_unionExistsMap, "fokus_bp_%d.json", path);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

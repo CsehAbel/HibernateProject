@@ -144,12 +144,12 @@ public class ReportToExcelTest {
 
         List<Rlst> notInPolicy = allthree.getNotInPolicy();
         if (notInPolicy.size() > 0) {
-            writeSetDifference(notInPolicy, "energy_notInPolicy_%d.xlsx", path);
+            writeSetDifference(notInPolicy, "fokus_notInPolicy_%d.xlsx", path);
         }
 
         List<Fwpolicy> notInRuleset = allthree.getNotInRlst();
         if (notInRuleset.size() > 0) {
-            writeSetDifference(notInRuleset, "energy_notInRuleset_%d.xlsx", path);
+            writeSetDifference(notInRuleset, "fokus_notInRuleset_%d.xlsx", path);
         }
     }
 
