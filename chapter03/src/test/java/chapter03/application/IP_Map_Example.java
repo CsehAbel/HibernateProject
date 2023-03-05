@@ -14,9 +14,9 @@ import lombok.Data;
 @Data
 public class IP_Map_Example {
 
-    private Map<Long, Set<Long>> map;
+    protected Map<Long, Set<Long>> map;
 
-    private QueryService service;
+    protected QueryService service;
 
     //assign map in the constructor
     public IP_Map_Example() {
@@ -25,7 +25,7 @@ public class IP_Map_Example {
     }
     
     
-    private Map<Long, Set<Long>> get_ip_map() {  
+    public Map<Long, Set<Long>> get_ip_map() {  
         List<IP> res_list = this.service.selectAll(IP.class);
         Map<Long, Set<Long>> map = new HashMap<>();
         for (int i = 0; i < res_list.size(); i++) {
@@ -37,7 +37,7 @@ public class IP_Map_Example {
         return map;
     }
 
-    private <T> void fillMap(Map<T, Set<Long>> map, T key, Long value) {
+    public <T> void fillMap(Map<T, Set<Long>> map, T key, Long value) {
         if (value == null) {
             value = 0L;
         }

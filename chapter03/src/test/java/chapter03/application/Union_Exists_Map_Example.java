@@ -15,12 +15,12 @@ import java.util.Iterator;
 public class Union_Exists_Map_Example {
 
     protected Map<Fwpolicy, Set<Rlst>> resource_innerJoin;
-    protected Map<Union_Alternative,Map<Long,ExistsAsHost>> result_unionExistsMap;
-    protected Map<Long, ExistsAsHost> resource_dst_ip_existsMap;
+    protected Map<Union_Alternative,Map<Long,Set<String>>> result_unionExistsMap;
+    protected Map<Long, Set<String>> resource_dst_ip_bucketsMap;
 
     public Union_Exists_Map_Example() {
         this.resource_innerJoin = new Report_Alternative_Example().getInnerJoin();
-        this.resource_dst_ip_existsMap = new DstIp_Exists_Map_Example().getResult_dstIp_exists();
+        this.resource_dst_ip_bucketsMap = new IP_SrcBuckets_Map_Example().getResult_map();
         this.result_unionExistsMap = this.provideUnionExistsMap();
     }
 
@@ -29,7 +29,7 @@ public class Union_Exists_Map_Example {
         var r = this.provideUnionExistsMap();
     }
 
-    public Map<Union_Alternative,Map<Long,ExistsAsHost>> provideUnionExistsMap() {
+    public Map<Union_Alternative,Map<Long,Set<String>>> provideUnionExistsMap() {
         return this.provideUnionExistsMap(this.resource_innerJoin);
     }   
 
@@ -41,8 +41,8 @@ public class Union_Exists_Map_Example {
         return String.format("%d.%d.%d.%d", (ip >> 24 & 0xff), (ip >> 16 & 0xff), (ip >> 8 & 0xff), (ip & 0xff));
     }
 
-    public Map<Union_Alternative,Map<Long,ExistsAsHost>> provideUnionExistsMap(Map<Fwpolicy, Set<Rlst>> resource_innerJoin){
-        Map<Union_Alternative,Map<Long,ExistsAsHost>> result_unionExistsMap = new HashMap<>();
+    public Map<Union_Alternative,Map<Long,Set<String>>> provideUnionExistsMap(Map<Fwpolicy, Set<Rlst>> resource_innerJoin){
+        Map<Union_Alternative,Map<Long,Set<String>>> result_unionExistsMap = new HashMap<>();
         
         Iterator<Fwpolicy> it = resource_innerJoin.keySet().iterator();
         
@@ -54,11 +54,11 @@ public class Union_Exists_Map_Example {
             long start_int = fwpolicy.getDest_ip_start_int();
             long end_int = fwpolicy.getDest_ip_end_int();
             
-            Map<Long, ExistsAsHost> srcIpList = this.collectToExploded(start_int, end_int);
+            Map<Long, Set<String>> srcIpList = this.collectToExploded(start_int, end_int);
             
             if (!srcIpList.isEmpty()) {
                 
-                Map<Union_Alternative, Map<Long, ExistsAsHost>> map = new HashMap<>();
+                Map<Union_Alternative, Map<Long, Set<String>>> map = new HashMap<>();
                 map.put(u,srcIpList);
                 result_unionExistsMap.putAll(map);
             }
@@ -67,20 +67,20 @@ public class Union_Exists_Map_Example {
     }
 
 
-    private Map<Long, ExistsAsHost> collectToExploded(long start_int, long end_int) {
-        Map<Long,ExistsAsHost> srcIpList = new HashMap<>();
+    private Map<Long, Set<String>> collectToExploded(long start_int, long end_int) {
+        Map<Long,Set<String>> srcBucketMap = new HashMap<>();
         //iterate over the ip range, starting from the star_int to the end_int
         for (long j = start_int; j <= end_int; j++) {
             //check if the ip is already in the map
-            ExistsAsHost srcIp = this.resource_dst_ip_existsMap.get(j);
+            Set<String> srcBucket = this.resource_dst_ip_bucketsMap.get(j);
             //if srcIp is not null, then the ip is in the map
             //if so srcIpList.put(j,srcIp);  
             //otherwise don't put it in the map
-            if (srcIp!=null) {
-                srcIpList.put(j,srcIp);
+            if (srcBucket!=null) {
+                srcBucketMap.put(j,srcBucket);
             }
         }
-        return srcIpList;
+        return srcBucketMap;
     }
     
 }

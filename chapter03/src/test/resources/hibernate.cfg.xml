@@ -20,5 +20,6 @@
         <mapping class="chapter03.hibernate.Eagle"/>
         <mapping class="chapter03.hibernate.IP"/>
         <mapping class="chapter03.hibernate.Host"/>
+        <mapping class="chapter03.hibernate.Systems"/>
     </session-factory>
 </hibernate-configuration>

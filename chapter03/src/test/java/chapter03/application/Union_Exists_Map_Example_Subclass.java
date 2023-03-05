@@ -29,10 +29,10 @@ public class Union_Exists_Map_Example_Subclass extends Union_Exists_Map_Example 
     }
 
     @Override
-    public Map<Union_Alternative,Map<Long,ExistsAsHost>> provideUnionExistsMap(){
+    public Map<Union_Alternative,Map<Long,Set<String>>> provideUnionExistsMap(){
         this.eagle_map = new Eagle_Map_Example().getMap();
         Map<Fwpolicy, Set<Rlst>> newInnerJoin = this.filteredNewInnerJoin();
-        Map<Union_Alternative,Map<Long,ExistsAsHost>> unionExistMap = this.provideUnionExistsMap(newInnerJoin);
+        Map<Union_Alternative,Map<Long,Set<String>>> unionExistMap = this.provideUnionExistsMap(newInnerJoin);
         return unionExistMap;
     }
 

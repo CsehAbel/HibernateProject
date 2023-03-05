@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 //ArrayList
 import java.util.ArrayList;
@@ -38,11 +39,11 @@ public class BPToExcelTest {
     protected String path = "C:\\Users\\z004a6nh\\IdeaProjects\\HibernateProject\\chapter03\\reports";
 
     public void writeUnionToJsonFile(
-            Map<Union_Alternative, Map<Long, ExistsAsHost>> result_unionExistsMap, String filename, String path)
+            Map<Union_Alternative, Map<Long, Set<String>>> result_unionExistsMap, String filename, String path)
             throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
         // create an iterator of map entries
-        Iterator<Map.Entry<Union_Alternative, Map<Long, ExistsAsHost>>> it = result_unionExistsMap.entrySet()
+        Iterator<Map.Entry<Union_Alternative, Map<Long, Set<String>>>> it = result_unionExistsMap.entrySet()
                 .iterator();
 
         com.google.gson.JsonObject jsonObject = new com.google.gson.JsonObject();
@@ -50,7 +51,7 @@ public class BPToExcelTest {
         jsonObject.add("inBoth", array);
 
         while (it.hasNext()) {
-            Map.Entry<Union_Alternative, Map<Long, ExistsAsHost>> entry = it.next();
+            Map.Entry<Union_Alternative, Map<Long, Set<String>>> entry = it.next();
             com.google.gson.JsonObject innerJsonObject = new com.google.gson.JsonObject();
             array.add(innerJsonObject);
 
@@ -84,7 +85,7 @@ public class BPToExcelTest {
         System.out.println("Done writing to file: " + file_name);
     }
 
-    private com.google.gson.JsonObject create_union_aObj(Map.Entry<Union_Alternative, Map<Long, ExistsAsHost>> entry) {
+    private com.google.gson.JsonObject create_union_aObj(Map.Entry<Union_Alternative, Map<Long, Set<String>>> entry) {
         com.google.gson.JsonObject union_aObj = new com.google.gson.JsonObject();
         Set<Rlst> rlst = entry.getKey().getRlstSet();
         com.google.gson.JsonArray arrayForRlst = create_rlsts_array(rlst);
@@ -96,46 +97,32 @@ public class BPToExcelTest {
         return union_aObj;
     }
 
-    private com.google.gson.JsonObject create_existsObj(Map.Entry<Union_Alternative, Map<Long, ExistsAsHost>> entry) {
-        com.google.gson.JsonObject existsObj = new com.google.gson.JsonObject();
-        Map<Long, ExistsAsHost> map = entry.getValue();
+    private com.google.gson.JsonObject create_existsObj(Map.Entry<Union_Alternative, Map<Long, Set<String>>> entry) {
+        com.google.gson.JsonObject bucketsObj = new com.google.gson.JsonObject();
+        Map<Long, Set<String>> map = entry.getValue();
         
-        com.google.gson.JsonArray array_exists_notexists = new com.google.gson.JsonArray();
-        existsObj.add("array_exists_notexists", array_exists_notexists);
+        com.google.gson.JsonArray buckets = new com.google.gson.JsonArray();
+        
 
-        com.google.gson.JsonObject notexistsObj = new com.google.gson.JsonObject();
-        array_exists_notexists.add(notexistsObj);
-        com.google.gson.JsonArray array_notexists = new com.google.gson.JsonArray();
-        notexistsObj.add("notExists", array_notexists);
+        Iterator<Map.Entry<Long, Set<String>>> it2 = map.entrySet().iterator();
+        Set<String> mergedBuckets = new HashSet<>();
 
-        com.google.gson.JsonObject existsYesObj = new com.google.gson.JsonObject();
-        array_exists_notexists.add(existsYesObj);
-        com.google.gson.JsonArray array_exists = new com.google.gson.JsonArray();
-        existsYesObj.add("exists", array_exists);
-
-        Iterator<Map.Entry<Long, ExistsAsHost>> it2 = map.entrySet().iterator();
         while (it2.hasNext()) {
 
-            Map.Entry<Long, ExistsAsHost> entry2 = it2.next();
+            Map.Entry<Long, Set<String>> entry2 = it2.next();
 
-            ExistsAsHost existsAsHost = entry2.getValue();
+            Set<String> setOfBuckets = entry2.getValue();
             
-
-            Iterator<String> it3 = existsAsHost.getNotexists().iterator();
-            while (it3.hasNext()) {
-                String notexists = it3.next();
-                array_notexists.add(notexists);
-            }
-            
-            
-            Iterator<String> it4 = existsAsHost.getExists().iterator();
-            while (it4.hasNext()) {
-                String exists = it4.next();
-                array_exists.add(exists);
-            }
-            
+            mergedBuckets.addAll(setOfBuckets);
         }
-        return existsObj;
+
+        for (String each : mergedBuckets) {
+            buckets.add(each);
+        }
+
+        bucketsObj.add(String.format("%d_buckets",mergedBuckets.size()), buckets);
+
+        return bucketsObj;
     }
 
     private com.google.gson.JsonObject create_fwpolicy_object(Fwpolicy fwpolicy) {
