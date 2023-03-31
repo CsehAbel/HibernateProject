@@ -32,6 +32,10 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 
+import chapter03.util.LoggingUtil;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 public class BPToExcelTest {
 
     // Union_Exists_Map_Example_Subclass union_Exists_Map_Example_Subclass;
@@ -55,18 +59,16 @@ public class BPToExcelTest {
             com.google.gson.JsonObject innerJsonObject = new com.google.gson.JsonObject();
             array.add(innerJsonObject);
 
-            String keys_ip = entry.getKey().getFwpolicy().getDest_ip_start() + "_"
-                    + entry.getKey().getFwpolicy().getDest_ip_end();
-            String keys_appid = entry.getKey().getRlstSet().stream().map(Rlst::getApp_id).reduce("", (a, b) -> a + "_" + b);
-            String key = keys_ip + "_" + keys_appid;
+            String key = concatStartEndIP(entry);
+            
             com.google.gson.JsonArray arrayOfTwo = new com.google.gson.JsonArray();
 
             innerJsonObject.add(key, arrayOfTwo);
 
-            com.google.gson.JsonObject union_aObj = create_union_aObj(entry);
+            com.google.gson.JsonObject union_aObj = this.create_union_aObj(entry);
             arrayOfTwo.add(union_aObj);
 
-            com.google.gson.JsonObject existsObj = create_existsObj(entry);
+            com.google.gson.JsonObject existsObj = this.create_existsObj(entry);
             arrayOfTwo.add(existsObj);
         }
 
@@ -83,6 +85,17 @@ public class BPToExcelTest {
             e.printStackTrace();
         }
         System.out.println("Done writing to file: " + file_name);
+    }
+
+    private String concatStartEndIP(Map.Entry<Union_Alternative, Map<Long, Set<String>>> entry) {
+        String keys_ip = entry.getKey().getFwpolicy().getDest_ip_start() + "_"
+                + entry.getKey().getFwpolicy().getDest_ip_end();
+        //collect the app_id's into a Set
+        //concatenate the app_id's into a String
+        Set<String> app_id_set = entry.getKey().getRlstSet().stream().map(Rlst::getApp_id).collect(HashSet::new, HashSet::add, HashSet::addAll);
+        String keys_appid = app_id_set.stream().reduce("", (a, b) -> a + "_" + b);
+        String key = keys_ip + "_" + keys_appid;
+        return key;
     }
 
     private com.google.gson.JsonObject create_union_aObj(Map.Entry<Union_Alternative, Map<Long, Set<String>>> entry) {
@@ -182,7 +195,11 @@ public class BPToExcelTest {
                 try {
                     var value = method.invoke(aRlst);
                     if (value == null){
-                        throw new NullPointerException();
+                        Logger logger2 = LoggingUtil.initLogger("npe2", LoggingUtil.path + "\\" + "rlstnullvalues.xml");
+                        //throw new NullPointerException();
+                        //log the null value'‚ reason, the object, and which getter resulted in null
+                        String message = String.format("null value for %s in %s", name, aRlst.toString());
+                        logger2.log(Level.WARNING, message);
                     }
                     rlstJsonObject.addProperty(name, value == null ? "null" : value.toString());
                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
