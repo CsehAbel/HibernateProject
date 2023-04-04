@@ -6,7 +6,7 @@
     <session-factory>
         <!--Database connection settings-->
         <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
-        <property name="connection.url">jdbc:mysql://localhost:3306/darwin_db</property>
+        <property name="connection.url">jdbc:mysql://localhost:3306/csv_db</property>
         <property name="connection.username">root</property>
         <property name="connection.password">sureshot</property>
         <property name="dialect">org.hibernate.dialect.MySQL8Dialect</property>
@@ -15,11 +15,11 @@
         <!--Drop and re-create the database schema on startup-->
         <property name="hbm2ddl.auto">update</property>
         <property name="hibernate.globally_quoted_identifiers">true</property>
-        <mapping class="chapter03.hibernate.IP"/>
         <mapping class="chapter03.hibernate.Fwpolicy"/>
         <mapping class="chapter03.hibernate.Rlst"/>
         <mapping class="chapter03.hibernate.Eagle"/>
         <mapping class="chapter03.hibernate.IP"/>
         <mapping class="chapter03.hibernate.Host"/>
+        <mapping class="chapter03.hibernate.Systems"/>
     </session-factory>
 </hibernate-configuration>
