@@ -50,11 +50,17 @@ public class IP_SrcBuckets_Map_Example {
             var dst_ip = iu.getDst_ip_int();
             var src_ip = iu.getSrc_ip_int();
             for(int j = 0; j < this.resource_systems.size(); j++) {
-                Systems sys = this.resource_systems.get(j);
-                var sys_start = sys.getStart_int();
-                var sys_end = sys.getEnd_int();
-                if (sys_start <= src_ip && src_ip <= sys_end) {
-                    fillMap(map, dst_ip, sys.getName());
+                
+                try{
+                    Systems sys = this.resource_systems.get(j);
+                    var sys_start = sys.getStart_int();
+                    var sys_end = sys.getEnd_int();
+                    if (sys_start <= src_ip && src_ip <= sys_end) {
+                        fillMap(map, dst_ip, sys.getName());
+                    }
+                } catch (Exception e) {
+                    // TODO: handle exception
+                    System.out.println("Exception: " + e.getMessage());
                 }
             }
         }

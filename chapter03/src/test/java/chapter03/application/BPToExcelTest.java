@@ -222,10 +222,10 @@ public class BPToExcelTest {
     @Test
     public void createBPXlsx() throws SecurityException, IOException {
 
-        union_Exists_Map_Example = new Union_Exists_Map_Example_Subclass();
+        union_Exists_Map_Example = new Union_Exists_Map_Example();
         // write the report2 list to an excel file
         try {
-            writeUnionToJsonFile(union_Exists_Map_Example.result_unionExistsMap, "energyx_bp_%d.json", path);
+            writeUnionToJsonFile(union_Exists_Map_Example.result_unionExistsMap, "darwin_bp_%d.json", path);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
