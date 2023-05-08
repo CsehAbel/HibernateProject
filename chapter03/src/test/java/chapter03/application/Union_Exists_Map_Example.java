@@ -15,7 +15,7 @@ import java.util.Iterator;
 public class Union_Exists_Map_Example {
 
     protected Map<Fwpolicy, Set<Rlst>> resource_innerJoin;
-    protected Map<Union_Alternative,Map<Long,Set<String>>> result_unionExistsMap;
+    protected Map<Fwpolicy,Map<Long,Set<String>>> result_unionExistsMap;
     protected Map<Long, Set<String>> resource_dst_ip_bucketsMap;
 
     public Union_Exists_Map_Example() {
@@ -29,7 +29,7 @@ public class Union_Exists_Map_Example {
         var r = this.provideUnionExistsMap();
     }
 
-    public Map<Union_Alternative,Map<Long,Set<String>>> provideUnionExistsMap() {
+    public Map<Fwpolicy,Map<Long,Set<String>>> provideUnionExistsMap() {
         return this.provideUnionExistsMap(this.resource_innerJoin);
     }   
 
@@ -41,15 +41,13 @@ public class Union_Exists_Map_Example {
         return String.format("%d.%d.%d.%d", (ip >> 24 & 0xff), (ip >> 16 & 0xff), (ip >> 8 & 0xff), (ip & 0xff));
     }
 
-    public Map<Union_Alternative,Map<Long,Set<String>>> provideUnionExistsMap(Map<Fwpolicy, Set<Rlst>> resource_innerJoin){
-        Map<Union_Alternative,Map<Long,Set<String>>> result_unionExistsMap = new HashMap<>();
+    public Map<Fwpolicy,Map<Long,Set<String>>> provideUnionExistsMap(Map<Fwpolicy, Set<Rlst>> resource_innerJoin){
+        Map<Fwpolicy,Map<Long,Set<String>>> result_unionExistsMap = new HashMap<>();
         
         Iterator<Fwpolicy> it = resource_innerJoin.keySet().iterator();
         
         while (it.hasNext()) {
             Fwpolicy fwpolicy = it.next();
-            Set<Rlst> rlstSet = resource_innerJoin.get(fwpolicy);
-            Union_Alternative u = new Union_Alternative(fwpolicy, rlstSet);
             //List of source ips
             long start_int = fwpolicy.getDest_ip_start_int();
             long end_int = fwpolicy.getDest_ip_end_int();
@@ -58,8 +56,8 @@ public class Union_Exists_Map_Example {
             
             if (!srcIpList.isEmpty()) {
                 
-                Map<Union_Alternative, Map<Long, Set<String>>> map = new HashMap<>();
-                map.put(u,srcIpList);
+                Map<Fwpolicy, Map<Long, Set<String>>> map = new HashMap<>();
+                map.put(fwpolicy,srcIpList);
                 result_unionExistsMap.putAll(map);
             }
         }

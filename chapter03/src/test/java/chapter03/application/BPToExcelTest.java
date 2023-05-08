@@ -43,11 +43,11 @@ public class BPToExcelTest {
     protected String path = "C:\\Users\\z004a6nh\\IdeaProjects\\HibernateProject\\chapter03\\reports";
 
     public void writeUnionToJsonFile(
-            Map<Union_Alternative, Map<Long, Set<String>>> result_unionExistsMap, String filename, String path)
+            Map<Fwpolicy, Map<Long, Set<String>>> result_unionExistsMap, String filename, String path)
             throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
         // create an iterator of map entries
-        Iterator<Map.Entry<Union_Alternative, Map<Long, Set<String>>>> it = result_unionExistsMap.entrySet()
+        Iterator<Map.Entry<Fwpolicy, Map<Long, Set<String>>>> it = result_unionExistsMap.entrySet()
                 .iterator();
 
         com.google.gson.JsonObject jsonObject = new com.google.gson.JsonObject();
@@ -55,7 +55,7 @@ public class BPToExcelTest {
         jsonObject.add("inBoth", array);
 
         while (it.hasNext()) {
-            Map.Entry<Union_Alternative, Map<Long, Set<String>>> entry = it.next();
+            Map.Entry<Fwpolicy, Map<Long, Set<String>>> entry = it.next();
             com.google.gson.JsonObject innerJsonObject = new com.google.gson.JsonObject();
             array.add(innerJsonObject);
 
@@ -65,8 +65,8 @@ public class BPToExcelTest {
 
             innerJsonObject.add(key, arrayOfTwo);
 
-            com.google.gson.JsonObject union_aObj = this.create_union_aObj(entry);
-            arrayOfTwo.add(union_aObj);
+            com.google.gson.JsonObject firewall_object = create_fwpolicy_object(entry.getKey());
+            arrayOfTwo.add(firewall_object);
 
             com.google.gson.JsonObject existsObj = this.create_existsObj(entry);
             arrayOfTwo.add(existsObj);
@@ -87,30 +87,20 @@ public class BPToExcelTest {
         System.out.println("Done writing to file: " + file_name);
     }
 
-    private String concatStartEndIP(Map.Entry<Union_Alternative, Map<Long, Set<String>>> entry) {
-        String keys_ip = entry.getKey().getFwpolicy().getDest_ip_start() + "_"
-                + entry.getKey().getFwpolicy().getDest_ip_end();
+    private String concatStartEndIP(Map.Entry<Fwpolicy, Map<Long, Set<String>>> entry) {
+        String keys_ip = entry.getKey().getDest_ip_start() + "_"
+                + entry.getKey().getDest_ip_end();
         //collect the app_id's into a Set
         //concatenate the app_id's into a String
-        Set<String> app_id_set = entry.getKey().getRlstSet().stream().map(Rlst::getApp_id).collect(HashSet::new, HashSet::add, HashSet::addAll);
-        String keys_appid = app_id_set.stream().reduce("", (a, b) -> a + "_" + b);
-        String key = keys_ip + "_" + keys_appid;
+        // Set<String> app_id_set = entry.getKey().getRlstSet().stream().map(Rlst::getApp_id).collect(HashSet::new, HashSet::add, HashSet::addAll);
+        // String keys_appid = app_id_set.stream().reduce("", (a, b) -> a + "_" + b);
+        // String key = keys_ip + "_" + keys_appid;
+        // return key;
+        String key = keys_ip;
         return key;
     }
 
-    private com.google.gson.JsonObject create_union_aObj(Map.Entry<Union_Alternative, Map<Long, Set<String>>> entry) {
-        com.google.gson.JsonObject union_aObj = new com.google.gson.JsonObject();
-        Set<Rlst> rlst = entry.getKey().getRlstSet();
-        com.google.gson.JsonArray arrayForRlst = create_rlsts_array(rlst);
-        union_aObj.add("rlsts", arrayForRlst);
-
-        Fwpolicy fwpolicy = entry.getKey().getFwpolicy();
-        com.google.gson.JsonObject fwpolicyJsonObject = create_fwpolicy_object(fwpolicy);
-        union_aObj.add("fwpolicy", fwpolicyJsonObject);
-        return union_aObj;
-    }
-
-    private com.google.gson.JsonObject create_existsObj(Map.Entry<Union_Alternative, Map<Long, Set<String>>> entry) {
+    private com.google.gson.JsonObject create_existsObj(Map.Entry<Fwpolicy, Map<Long, Set<String>>> entry) {
         com.google.gson.JsonObject bucketsObj = new com.google.gson.JsonObject();
         Map<Long, Set<String>> map = entry.getValue();
         
@@ -225,7 +215,7 @@ public class BPToExcelTest {
         union_Exists_Map_Example = new Union_Exists_Map_Example_Subclass();
         // write the report2 list to an excel file
         try {
-            writeUnionToJsonFile(union_Exists_Map_Example.result_unionExistsMap, "energyx_bp_%d.json", path);
+            writeUnionToJsonFile(union_Exists_Map_Example.result_unionExistsMap, "energyy_bp_%d.json", path);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
