@@ -1,19 +1,18 @@
 package chapter03.application;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.testng.annotations.Test;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashMap;
-import java.util.Iterator;
+
+import java.util.*;
 //ArrayList
-import java.util.ArrayList;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 //reflections
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.stream.Collectors;
 
 //GSON
 import com.google.gson.Gson;
@@ -193,7 +192,7 @@ public class BPToExcelTest {
                 try {
                     var value = method.invoke(aRlst);
                     if (value == null){
-                        throw new NullPointerException();
+                        System.out.println("One of the fields of the object rlst is null");
                     }
                     rlstJsonObject.addProperty(name, value == null ? "null" : value.toString());
                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -213,14 +212,80 @@ public class BPToExcelTest {
         return String.format("%d.%d.%d.%d", (ip >> 24 & 0xff), (ip >> 16 & 0xff), (ip >> 8 & 0xff), (ip & 0xff));
     }
 
+
+    //Using gson to write the json file
+    public void serializeToJsonFile(Object obj, String file_name, String path) throws IOException {
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String json = gson.toJson(obj);
+        try (FileWriter writer = new FileWriter(path + "\\" + file_name);) {
+            gson.toJson(obj, writer);
+        }
+
+    }
+
+    public void convertListToCSV(List<Union_Exists_Map_Example_Subclass_3.App_Exists> objectList, String file_name, String path) throws IOException {
+
+
+        List<Union_Exists_Map_Example_Subclass_3.App_Exists> app_existsList = new ArrayList<>();
+        for (Union_Exists_Map_Example_Subclass_3.App_Exists app_exists : objectList) {
+            //if any of app_exists.dst_ip(), app_exists.exists(), app_exists.notexists(),app_exists.app_name(),app_exists.app_id()
+            //is longer than 32767 characters, write it to a file
+            int max_length = 32767;
+            if(app_exists.dst_ip().length()>max_length || app_exists.exists().length()>max_length || app_exists.notexists().length()>max_length || app_exists.app_name().length()>max_length || app_exists.app_id().length()>max_length){
+                //write out specificly which one is longer than max_length characters
+                serializeToJsonFile(app_exists,app_exists.dst_ip(),path);
+                //check which one is longer than max_length characters
+                //and split the one that is longer than max_length characters in two parts keeping all the other fields the same
+                //and add the two parts to the app_existsList
+                if(app_exists.exists().length()>max_length){
+                    var exists = app_exists.exists().split(",");
+                    //concatenate the first 1500 elements of the array exists
+                    var exists1 = String.join(",", Arrays.copyOfRange(exists, 0, 1500));
+                    //concatenate the rest of the elements of the array exists
+                    var exists2 = String.join(",", Arrays.copyOfRange(exists, 1500, exists.length));
+                    app_existsList.add(new Union_Exists_Map_Example_Subclass_3.App_Exists(app_exists.dst_ip(),exists1,app_exists.notexists(),app_exists.app_name(),app_exists.app_id()));
+                    app_existsList.add(new Union_Exists_Map_Example_Subclass_3.App_Exists(app_exists.dst_ip(),exists2,app_exists.notexists(),app_exists.app_name(),app_exists.app_id()));
+                }
+                if(app_exists.notexists().length()>max_length){
+                    var notexists = app_exists.notexists().split(",");
+                    //concatenate the first 1500 elements of the array notexists
+                    var notexists1 = String.join(",", Arrays.copyOfRange(notexists, 0, 1500));
+                    //concatenate the rest of the elements of the array notexists
+                    var notexists2 = String.join(",", Arrays.copyOfRange(notexists, 1500, notexists.length));
+                    app_existsList.add(new Union_Exists_Map_Example_Subclass_3.App_Exists(app_exists.dst_ip(),app_exists.exists(),notexists1,app_exists.app_name(),app_exists.app_id()));
+                    app_existsList.add(new Union_Exists_Map_Example_Subclass_3.App_Exists(app_exists.dst_ip(),app_exists.exists(),notexists2,app_exists.app_name(),app_exists.app_id()));
+                }
+            } else {
+                app_existsList.add(app_exists);
+            }
+        }
+
+        var formattedFileName = String.format(file_name, app_existsList.size());
+        var fullPath = path + "\\" + formattedFileName;
+        FileWriter fileWriter = new FileWriter(fullPath);
+        var headers = new String[]{"dst_ip", "src_ip_exists","src_ip_notexists","app_name","app_id"};
+        CSVPrinter csvPrinter = new CSVPrinter(fileWriter, CSVFormat.DEFAULT.withHeader(headers));
+
+        for(Union_Exists_Map_Example_Subclass_3.App_Exists app_exists : app_existsList){
+            csvPrinter.printRecord(app_exists.dst_ip(), app_exists.exists(), app_exists.notexists(),app_exists.app_name(),app_exists.app_id());
+        }
+
+
+        csvPrinter.flush();
+        csvPrinter.close();
+    }
+
     @Test
     public void createBPXlsx() throws SecurityException, IOException {
 
-        union_Exists_Map_Example = new Union_Exists_Map_Example_Subclass();
+        var obj = new Union_Exists_Map_Example_Subclass_3().getResult_map_2();
         // write the report2 list to an excel file
         try {
-            writeUnionToJsonFile(union_Exists_Map_Example.result_unionExistsMap, "energyx_bp_%d.json", path);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            //writeUnionToJsonFile(union_Exists_Map_Example.result_unionExistsMap, "energyx_bp_%d.json", path);
+            serializeToJsonFile(obj,String.format("energyz_bp%d.json",obj.size()), path);
+            convertListToCSV(obj,"energyz_bp%d.csv", path);
+        } catch (IllegalArgumentException e){//IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

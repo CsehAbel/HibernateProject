@@ -14,9 +14,9 @@ import java.util.Iterator;
 @lombok.Data
 public class Union_Exists_Map_Example {
 
-    protected Map<Fwpolicy, Set<Rlst>> resource_innerJoin;
-    protected Map<Union_Alternative,Map<Long,ExistsAsHost>> result_unionExistsMap;
-    protected Map<Long, ExistsAsHost> resource_dst_ip_existsMap;
+    public Map<Fwpolicy, Set<Rlst>> resource_innerJoin;
+    public Map<Union_Alternative,Map<Long,ExistsAsHost>> result_unionExistsMap;
+    public Map<Long, ExistsAsHost> resource_dst_ip_existsMap;
 
     public Union_Exists_Map_Example() {
         this.resource_innerJoin = new Report_Alternative_Example().getInnerJoin();
